@@ -7,14 +7,14 @@ interface AvatarInitialProps {
   className?: string;
 }
 
-const GRADIENTS = [
-  'from-blue-600 to-indigo-600',
-  'from-violet-600 to-purple-600',
-  'from-emerald-600 to-teal-600',
-  'from-amber-500 to-orange-600',
-  'from-rose-500 to-pink-600',
-  'from-cyan-600 to-blue-600',
-  'from-fuchsia-600 to-pink-600',
+const COLOR_PALETTES = [
+  'bg-blue-100 text-blue-800 border-blue-200',
+  'bg-indigo-100 text-indigo-800 border-indigo-200',
+  'bg-emerald-100 text-emerald-800 border-emerald-200',
+  'bg-amber-100 text-amber-800 border-amber-200',
+  'bg-purple-100 text-purple-800 border-purple-200',
+  'bg-teal-100 text-teal-800 border-teal-200',
+  'bg-slate-100 text-slate-800 border-slate-200',
 ];
 
 export const AvatarInitial: React.FC<AvatarInitialProps> = ({
@@ -22,13 +22,11 @@ export const AvatarInitial: React.FC<AvatarInitialProps> = ({
   size = 'md',
   className = '',
 }) => {
-  // Deterministic gradient selection based on name string
   const hash = (name || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const gradient = GRADIENTS[hash % GRADIENTS.length];
+  const colorScheme = COLOR_PALETTES[hash % COLOR_PALETTES.length];
 
-  // Extract initials (e.g. Dr. Ravi Kumar -> RK or DR)
   const cleanName = (name || '')
-    .replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/i, '')
+    .replace(/^(Dr\.|Prof\.|Assoc\.\s*Prof\.|Mr\.|Mrs\.|Ms\.)\s+/i, '')
     .trim();
   const parts = cleanName.split(/\s+/).filter(Boolean);
   let initials = '';
@@ -37,21 +35,21 @@ export const AvatarInitial: React.FC<AvatarInitialProps> = ({
   } else if (parts.length === 1 && parts[0].length > 0) {
     initials = parts[0].substring(0, 2).toUpperCase();
   } else {
-    initials = 'LE';
+    initials = 'FA';
   }
 
   const sizeClasses = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm font-semibold',
-    lg: 'w-14 h-14 text-lg font-bold',
+    sm: 'w-8 h-8 text-xs font-semibold',
+    md: 'w-11 h-11 text-sm font-bold',
+    lg: 'w-14 h-14 text-base font-bold',
     xl: 'w-20 h-20 text-2xl font-bold',
   };
 
   return (
     <div
       className={cn(
-        'rounded-full flex items-center justify-center text-white bg-gradient-to-br shadow-sm select-none shrink-0 ring-2 ring-white/80 dark:ring-slate-800',
-        gradient,
+        'rounded-full border flex items-center justify-center select-none shrink-0 shadow-xs font-sans',
+        colorScheme,
         sizeClasses[size],
         className
       )}

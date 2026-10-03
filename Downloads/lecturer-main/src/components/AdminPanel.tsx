@@ -253,9 +253,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </span>
             <span className="text-xs text-slate-500">• Central Terminal Mesh</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Faculty Directory &amp; Hardware Administration
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              Faculty Directory Management
+            </h1>
+            <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
+              (Faculty Registry &amp; Hardware Administration)
+            </span>
+          </div>
           <p className="text-sm text-slate-600 mt-1">
             Manage lecturer profiles, corridor display pairings, department assignments, and system telemetry.
           </p>
@@ -277,7 +282,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             Export Data (CSV)
           </button>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => setIsAddModalOpen(!isAddModalOpen)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-xs transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
@@ -291,6 +296,70 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <RotateCcw className="w-4 h-4 text-slate-500" />
           </button>
         </div>
+      </div>
+
+      {/* Add New Faculty Member Card */}
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <UserPlus className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Add New Faculty Member</h3>
+              <p className="text-xs text-slate-500">Assign name, office room, and default availability.</p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleAddSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+          <div className="sm:col-span-5">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name *</label>
+            <input
+              type="text"
+              placeholder="e.g. Dr. Rajesh Kumar"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div className="sm:col-span-3">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Office Room</label>
+            <input
+              type="text"
+              placeholder="e.g. C204"
+              value={newRoom}
+              onChange={(e) => setNewRoom(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Status</label>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value as LecturerStatus)}
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              <option value="Available">Available</option>
+              <option value="Busy">Busy</option>
+              <option value="Not Available">Not Available</option>
+            </select>
+          </div>
+
+          <div className="sm:col-span-2 flex items-end">
+            <button
+              type="submit"
+              disabled={isAdding}
+              className="w-full py-2 px-3 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>{isAdding ? 'Adding...' : 'Add Faculty'}</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* 4 KPI Cards (Academic Clean Style from Snitch) */}
