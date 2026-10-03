@@ -1,0 +1,3180 @@
+<!-- Lecturer Dashboard & ESP32 Display Simulator (University Edition) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<title>SmartFaculty IoT - Lecturer Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#FAF8FF",
+            "background": "#F8FAFC",
+            "surface-white": "#FFFFFF",
+            "primary": "#004ac6",
+            "primary-container": "#2563eb",
+            "on-primary": "#ffffff",
+            "secondary": "#515f74",
+            "border-clean": "#E2E8F0",
+            "border-subtle": "#EEF2F6",
+            "status-available": "#059669",
+            "status-available-bg": "#ECFDF5",
+            "status-busy": "#D97706",
+            "status-busy-bg": "#FFFBEB",
+            "status-unavailable": "#DC2626",
+            "status-unavailable-bg": "#FEF2F2",
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .animate-marquee {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 18s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 antialiased min-h-screen flex flex-col">
+<!-- Academic Top Header -->
+<header class="sticky top-0 z-50 w-full bg-white border-b border-[#E2E8F0] shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+<!-- Brand & Sync Pill -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
+<span class="material-symbols-outlined text-[20px]">door_sliding</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-bold text-[17px] text-slate-900 tracking-tight">SmartFaculty IoT</span>
+<span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              ESP32 Live Sync
+            </span>
+</div>
+<span class="text-[11px] text-slate-500 font-normal">Department Corridor Presence System</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden lg:flex items-center gap-1">
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Overview</a>
+<a aria-current="page" class="px-3.5 py-1.5 rounded-md text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-100 shadow-xs" href="#">Lecturer Control</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Student Directory</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">IoT Terminals</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Admin Registry</a>
+</nav>
+<!-- Status Indicators & User -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>4 Available</span>
+<span class="text-slate-300">|</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>2 Busy</span>
+</div>
+<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>Supabase Connected</span>
+</div>
+<div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-semibold text-xs">
+            AV
+          </div>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-xs font-semibold text-slate-800 leading-tight">Dr. A. Vance</span>
+<span class="text-[10px] text-slate-500">Room 402</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Page Header (Prominent & Simple) -->
+<div class="mb-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
+<div>
+<h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Lecturer Control Center</h1>
+<p class="text-slate-600 text-sm sm:text-base mt-1 max-w-3xl">
+            Select your profile and update your live office presence. Changes synchronize instantaneously with your corridor hardware terminal.
+          </p>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<div class="px-3.5 py-2 rounded-lg bg-white border border-[#E2E8F0] shadow-xs flex items-center gap-3">
+<div class="flex flex-col">
+<span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Node Sync Latency</span>
+<span class="text-sm font-bold text-emerald-600 flex items-center gap-1 font-mono">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span id="latency-counter">28</span> ms
+              </span>
+</div>
+<div class="h-7 w-px bg-slate-200"></div>
+<button class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 py-1 px-2 rounded hover:bg-blue-50 transition-colors" id="quick-reconnect-btn">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+              Ping Node
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Two-Column Grid: Control Card & Hardware Terminal Preview -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
+<!-- LEFT COLUMN: Lecturer Selection & 1-Tap Status Switcher -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<div class="bg-white rounded-xl border border-[#E2E8F0] shadow-sm p-6 sm:p-7">
+<!-- Faculty Profile Selection -->
+<div class="mb-6">
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2" for="lecturer-select">
+              Faculty Profile Selection
+            </label>
+<div class="relative">
+<select class="w-full bg-slate-50 border border-[#E2E8F0] text-slate-900 font-semibold text-sm rounded-lg px-4 py-2.5 pr-10 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors cursor-pointer" id="lecturer-select">
+<option selected="" value="vance">Dr. Alan Vance — Room 402 (Distributed Systems)</option>
+<option value="sarah">Prof. Sarah Chen — Room 405 (Neural Computing)</option>
+<option value="marcus">Dr. Marcus Thorne — Room 410 (Quantum Hardware)</option>
+<option value="elena">Dr. Elena Rostova — Room 412 (Autonomous Robotics)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">
+                unfold_more
+              </span>
+</div>
+</div>
+<!-- Current Broadcast Status Banner -->
+<div class="mb-6 p-4 rounded-xl border bg-slate-50 border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-4" id="live-session-banner">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0" id="status-icon-wrap">
+<span class="material-symbols-outlined text-[24px]" id="status-main-icon">check_circle</span>
+</div>
+<div>
+<span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Current Broadcast Status</span>
+<span class="text-base font-bold text-emerald-700" id="status-headline-text">Available • In Office &amp; Open</span>
+<span class="block text-xs text-slate-500" id="status-sub-text">Walk-ins welcome for architectural office hours</span>
+</div>
+</div>
+<div class="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200">
+<span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Broadcasting Since</span>
+<span class="text-sm font-mono font-semibold text-slate-700" id="session-timer">01:42:19</span>
+</div>
+</div>
+<!-- Update Status Section (Three Clean Distinction Buttons) -->
+<div class="mb-6">
+<div class="flex items-center justify-between mb-2.5">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-500">Update Status</span>
+<span class="text-xs text-slate-400">Immediate corridor push</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<!-- AVAILABLE BUTTON -->
+<button class="status-btn active group text-left p-4 rounded-xl border-2 transition-all relative flex flex-col justify-between h-32 bg-emerald-50/70 border-emerald-600 shadow-xs" data-status="AVAILABLE">
+<div class="flex items-center justify-between w-full">
+<span class="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
+<span class="status-check text-emerald-600 font-bold material-symbols-outlined text-[20px]">check</span>
+</div>
+<div>
+<span class="block text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">Available</span>
+<span class="block text-xs text-slate-500 mt-0.5">In Office &amp; Available</span>
+</div>
+</button>
+<!-- BUSY BUTTON -->
+<button class="status-btn group text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-amber-400 hover:bg-amber-50/40 transition-all relative flex flex-col justify-between h-32 shadow-xs" data-status="BUSY">
+<div class="flex items-center justify-between w-full">
+<span class="w-3 h-3 rounded-full bg-amber-500 ring-4 ring-transparent group-hover:ring-amber-100"></span>
+<span class="status-check hidden text-amber-600 font-bold material-symbols-outlined text-[20px]">check</span>
+</div>
+<div>
+<span class="block text-sm font-bold text-slate-900 group-hover:text-amber-700 transition-colors">Busy</span>
+<span class="block text-xs text-slate-500 mt-0.5">Do Not Disturb / Meeting</span>
+</div>
+</button>
+<!-- NOT AVAILABLE BUTTON -->
+<button class="status-btn group text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-rose-400 hover:bg-rose-50/40 transition-all relative flex flex-col justify-between h-32 shadow-xs" data-status="OUT">
+<div class="flex items-center justify-between w-full">
+<span class="w-3 h-3 rounded-full bg-rose-500 ring-4 ring-transparent group-hover:ring-rose-100"></span>
+<span class="status-check hidden text-rose-600 font-bold material-symbols-outlined text-[20px]">check</span>
+</div>
+<div>
+<span class="block text-sm font-bold text-slate-900 group-hover:text-rose-700 transition-colors">Not Available</span>
+<span class="block text-xs text-slate-500 mt-0.5">In Lecture / Away</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Quick Corridor Marquee Note Input -->
+<div class="pt-4 border-t border-[#E2E8F0]">
+<div class="flex items-center justify-between mb-2">
+<label class="text-xs font-bold uppercase tracking-wider text-slate-500" for="custom-note-input">
+                Door Display Subtitle / Notice
+              </label>
+<span class="text-xs text-slate-400 font-mono" id="char-count">48 / 90</span>
+</div>
+<div class="flex flex-col sm:flex-row gap-2">
+<input class="flex-1 bg-white border border-[#E2E8F0] text-slate-900 px-3.5 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 placeholder:text-slate-400" id="custom-note-input" maxlength="90" placeholder="e.g. Back at 3:30 PM, consultation in Lab 2" type="text" value="Office hours until 5:00 PM • Distributed Systems Lab"/>
+<button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 shrink-0" id="update-marquee-btn">
+<span class="material-symbols-outlined text-[18px]">publish</span>
+                Update Display
+              </button>
+</div>
+</div>
+</div>
+<!-- Academic Schedule Snippet -->
+<div class="bg-white rounded-xl border border-[#E2E8F0] shadow-sm p-6">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="text-sm font-bold text-slate-900">Synchronized Office Hours Matrix</h3>
+<p class="text-xs text-slate-500">Automatic calendar schedule sync with campus SIS</p>
+</div>
+<span class="px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-xs font-medium">Wed, Oct 23</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+<span class="text-slate-400 font-mono block text-[11px]">09:00 - 11:30</span>
+<span class="font-semibold text-slate-800 block mt-1">Research Prep</span>
+<span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">BUSY</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+<span class="text-slate-400 font-mono block text-[11px]">11:30 - 14:00</span>
+<span class="font-semibold text-slate-800 block mt-1">CS402 Lecture</span>
+<span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">LECTURE</span>
+</div>
+<div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+<span class="text-emerald-700 font-mono block text-[11px]">14:00 - 17:00</span>
+<span class="font-bold text-emerald-900 block mt-1">Open Hours</span>
+<span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white">ACTIVE</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+<span class="text-slate-400 font-mono block text-[11px]">17:00 - 19:00</span>
+<span class="font-semibold text-slate-800 block mt-1">Lab Review</span>
+<span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-200 text-slate-700">TRANSIT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: IoT ESP32 Corridor Terminal Preview -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Realistic Door Mount Display Simulator -->
+<div class="bg-white rounded-xl border border-[#E2E8F0] shadow-sm p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-700 text-[20px]">monitor</span>
+<h2 class="text-sm font-bold text-slate-900">Corridor Terminal Preview</h2>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">
+              ESP32-OLED-402
+            </span>
+</div>
+<!-- Realistic Hardware Chassis (Dark Matte Gray Frame) -->
+<div class="rounded-xl bg-[#1E2530] p-4 border-4 border-[#0F141C] shadow-lg relative">
+<!-- Screw Mount Emulations -->
+<div class="absolute top-2 left-2 w-2 h-2 rounded-full bg-slate-600"></div>
+<div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-slate-600"></div>
+<div class="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-slate-600"></div>
+<div class="absolute bottom-2 right-2 w-2 h-2 rounded-full bg-slate-600"></div>
+<!-- Header Hardware Bezel info -->
+<div class="flex items-center justify-between text-[11px] font-mono text-slate-400 px-2 pb-2 mb-2 border-b border-slate-700/60">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span>HW-REV4 • CORR-402</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400" id="led-rx"></span>
+<span>MESH SYNC</span>
+</div>
+</div>
+<!-- E-Paper / Monochromatic OLED Door Display -->
+<div class="rounded-lg bg-[#0A0E17] p-5 font-mono text-slate-100 border border-slate-800 flex flex-col justify-between min-h-[280px]" id="oled-display-screen">
+<!-- Room Header Line -->
+<div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
+<div class="flex items-center gap-2 font-bold tracking-wider text-slate-200">
+<span id="screen-room">ROOM 402</span>
+<span class="text-slate-600">|</span>
+<span id="screen-lecturer">DR. A. VANCE</span>
+</div>
+<span class="text-slate-400 font-mono" id="screen-clock">14:42:19</span>
+</div>
+<!-- Primary Status Display Block -->
+<div class="py-6 text-center flex flex-col items-center justify-center">
+<div class="w-full py-4 px-3 rounded border border-emerald-500/40 bg-emerald-950/30 text-emerald-400 flex flex-col items-center justify-center transition-all duration-300" id="screen-badge">
+<span class="text-xl sm:text-2xl font-black tracking-widest uppercase" id="screen-status-main">
+                    [ AVAILABLE ]
+                  </span>
+<span class="text-xs tracking-wider uppercase mt-1 text-emerald-300 font-medium" id="screen-status-sub">
+                    PLEASE KNOCK &amp; ENTER
+                  </span>
+</div>
+<span class="text-[10px] text-slate-500 tracking-wider uppercase mt-3">Faculty of Distributed Computing</span>
+</div>
+<!-- Bottom Marquee Ticker -->
+<div class="bg-black/50 border border-slate-800/80 rounded px-2.5 py-1.5 text-xs text-cyan-300 overflow-hidden">
+<div class="w-full overflow-hidden whitespace-nowrap">
+<p class="animate-marquee inline-block font-mono text-[11px]" id="marquee-stream">
+                    Office hours until 5:00 PM • Distributed Systems Lab • Last updated via Lecturer Control
+                  </p>
+</div>
+</div>
+</div>
+<!-- Frame Bottom Status Understated Telemetry -->
+<div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-3 px-1">
+<span>MAC: 48:E7:29:A1:B8:90</span>
+<span class="text-emerald-400">WIFI: -54 dBm (92%)</span>
+<span>PWR: MAINS (5.0V)</span>
+</div>
+</div>
+<!-- Realistic Hardware Telemetry Details -->
+<div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-[#E2E8F0] text-xs">
+<div class="p-2 bg-slate-50 rounded border border-slate-100">
+<span class="text-[10px] text-slate-400 uppercase font-semibold block">Wi-Fi RSSI</span>
+<span class="font-mono font-semibold text-slate-700">-54 dBm</span>
+</div>
+<div class="p-2 bg-slate-50 rounded border border-slate-100">
+<span class="text-[10px] text-slate-400 uppercase font-semibold block">Power Source</span>
+<span class="font-mono font-semibold text-slate-700">Mains 5V</span>
+</div>
+<div class="p-2 bg-slate-50 rounded border border-slate-100">
+<span class="text-[10px] text-slate-400 uppercase font-semibold block">Refresh Latency</span>
+<span class="font-mono font-semibold text-emerald-700">28 ms</span>
+</div>
+<div class="p-2 bg-slate-50 rounded border border-slate-100">
+<span class="text-[10px] text-slate-400 uppercase font-semibold block">Firmware</span>
+<span class="font-mono font-semibold text-slate-700">v3.14.9</span>
+</div>
+</div>
+<!-- Clean Hardware Action Buttons -->
+<div class="mt-4 flex items-center justify-between gap-2">
+<button class="flex-1 py-2 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5" id="simulate-refresh-btn">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+              Simulate Refresh
+            </button>
+<button class="flex-1 py-2 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5" id="ping-node-btn">
+<span class="material-symbols-outlined text-[16px]">wifi_tethering</span>
+              Ping Node
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry & Broadcast Transaction Log Table (Clean White Card) -->
+<div class="bg-white rounded-xl border border-[#E2E8F0] shadow-sm p-6 mb-8">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-[#E2E8F0]">
+<div>
+<h3 class="text-base font-bold text-slate-900">Recent Broadcast Activity Log</h3>
+<p class="text-xs text-slate-500">Live audit ledger of lecturer presence updates and edge corridor terminal acknowledgments</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold transition-colors" id="clear-logs-btn">
+            Clear Local Cache
+          </button>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Realtime Stream Active
+          </span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead>
+<tr class="border-b border-slate-200 bg-slate-50/70 text-slate-500 uppercase font-semibold">
+<th class="py-2.5 px-4 font-mono">Timestamp</th>
+<th class="py-2.5 px-4">Lecturer &amp; Room</th>
+<th class="py-2.5 px-4">Origin Channel</th>
+<th class="py-2.5 px-4">Status Shift</th>
+<th class="py-2.5 px-4 font-mono">Payload Latency</th>
+<th class="py-2.5 px-4">ESP32 Sync Verification</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 font-sans text-slate-700" id="transaction-rows">
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4 font-mono text-slate-500">14:42:04.118</td>
+<td class="py-3 px-4 font-semibold text-slate-900">Dr. Alan Vance (Room 402)</td>
+<td class="py-3 px-4 text-slate-600">Web Dashboard (Lecturer Control)</td>
+<td class="py-3 px-4 font-medium">
+<span class="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-mono text-[11px]">BUSY</span>
+<span class="text-slate-400 mx-1">→</span>
+<span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">AVAILABLE</span>
+</td>
+<td class="py-3 px-4 font-mono text-emerald-700 font-semibold">28ms</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  ACK_SUPABASE_OK #7701
+                </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4 font-mono text-slate-500">13:10:18.902</td>
+<td class="py-3 px-4 font-semibold text-slate-900">Dr. Alan Vance (Room 402)</td>
+<td class="py-3 px-4 text-slate-600">NFC Door Terminal</td>
+<td class="py-3 px-4 font-medium">
+<span class="text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded font-mono text-[11px]">NOT AVAILABLE</span>
+<span class="text-slate-400 mx-1">→</span>
+<span class="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">BUSY</span>
+</td>
+<td class="py-3 px-4 font-mono text-emerald-700 font-semibold">19ms</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  ACK_SUPABASE_OK #7700
+                </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4 font-mono text-slate-500">11:32:00.410</td>
+<td class="py-3 px-4 font-semibold text-slate-900">Dr. Alan Vance (Room 402)</td>
+<td class="py-3 px-4 text-slate-600">Academic Calendar Auto-Sync</td>
+<td class="py-3 px-4 font-medium">
+<span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono text-[11px]">AVAILABLE</span>
+<span class="text-slate-400 mx-1">→</span>
+<span class="text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">NOT AVAILABLE</span>
+</td>
+<td class="py-3 px-4 font-mono text-emerald-700 font-semibold">32ms</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  ACK_SUPABASE_OK #7699
+                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- Clean Academic Footer -->
+<footer class="w-full bg-white border-t border-[#E2E8F0] py-6 text-xs text-slate-500 mt-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-700">SmartFaculty IoT</span>
+<span class="text-slate-300">|</span>
+<span>Campus Real-Time Hardware Architecture • ESP32 &amp; Supabase Integration</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 text-slate-600">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Gateway Hub #West-400 Active
+        </span>
+<span class="text-slate-300">|</span>
+<span>Version 2.4.0-Production</span>
+</div>
+</div>
+</footer>
+<!-- Realtime Switcher & Simulator Script -->
+<script>
+    (function initControlCenter() {
+      let currentStatus = "AVAILABLE";
+      let previousStatus = "BUSY";
+
+      const STATUS_CONFIG = {
+        AVAILABLE: {
+          label: "Available",
+          headline: "Available • In Office & Open",
+          sub: "Walk-ins welcome for architectural office hours",
+          colorClass: "text-emerald-700",
+          iconBg: "bg-emerald-100",
+          iconColor: "text-emerald-700",
+          icon: "check_circle",
+          badgeBorder: "border-emerald-500/40",
+          badgeBg: "bg-emerald-950/30",
+          badgeText: "text-emerald-400",
+          badgeSubText: "text-emerald-300",
+          screenTitle: "[ AVAILABLE ]",
+          screenSub: "PLEASE KNOCK & ENTER",
+          btnActiveBorder: "border-emerald-600",
+          btnActiveBg: "bg-emerald-50/70",
+          checkColor: "text-emerald-600"
+        },
+        BUSY: {
+          label: "Busy",
+          headline: "Busy • Do Not Disturb",
+          sub: "Conducting project evaluation or remote conference",
+          colorClass: "text-amber-700",
+          iconBg: "bg-amber-100",
+          iconColor: "text-amber-700",
+          icon: "pending",
+          badgeBorder: "border-amber-500/40",
+          badgeBg: "bg-amber-950/30",
+          badgeText: "text-amber-400",
+          badgeSubText: "text-amber-300",
+          screenTitle: "[ BUSY / IN MEETING ]",
+          screenSub: "DO NOT DISTURB",
+          btnActiveBorder: "border-amber-600",
+          btnActiveBg: "bg-amber-50/70",
+          checkColor: "text-amber-600"
+        },
+        OUT: {
+          label: "Not Available",
+          headline: "Not Available • Away / In Lecture",
+          sub: "Faculty member not currently available at office",
+          colorClass: "text-rose-700",
+          iconBg: "bg-rose-100",
+          iconColor: "text-rose-700",
+          icon: "do_not_disturb_on",
+          badgeBorder: "border-rose-500/40",
+          badgeBg: "bg-rose-950/30",
+          badgeText: "text-rose-400",
+          badgeSubText: "text-rose-300",
+          screenTitle: "[ NOT AVAILABLE ]",
+          screenSub: "PLEASE SEND AN EMAIL",
+          btnActiveBorder: "border-rose-600",
+          btnActiveBg: "bg-rose-50/70",
+          checkColor: "text-rose-600"
+        }
+      };
+
+      const LECTURER_DATA = {
+        vance: { name: "Dr. Alan Vance", room: "ROOM 402", dept: "Distributed Systems" },
+        sarah: { name: "Prof. Sarah Chen", room: "ROOM 405", dept: "Neural Computing" },
+        marcus: { name: "Dr. Marcus Thorne", room: "ROOM 410", dept: "Quantum Hardware" },
+        elena: { name: "Dr. Elena Rostova", room: "ROOM 412", dept: "Autonomous Robotics" }
+      };
+
+      const statusButtons = document.querySelectorAll(".status-btn");
+      const statusHeadlineText = document.getElementById("status-headline-text");
+      const statusSubText = document.getElementById("status-sub-text");
+      const statusIconWrap = document.getElementById("status-icon-wrap");
+      const statusMainIcon = document.getElementById("status-main-icon");
+
+      const screenRoom = document.getElementById("screen-room");
+      const screenLecturer = document.getElementById("screen-lecturer");
+      const screenBadge = document.getElementById("screen-badge");
+      const screenStatusMain = document.getElementById("screen-status-main");
+      const screenStatusSub = document.getElementById("screen-status-sub");
+      const marqueeStream = document.getElementById("marquee-stream");
+      const customNoteInput = document.getElementById("custom-note-input");
+      const charCount = document.getElementById("char-count");
+      const updateMarqueeBtn = document.getElementById("update-marquee-btn");
+      const lecturerSelect = document.getElementById("lecturer-select");
+      const latencyCounter = document.getElementById("latency-counter");
+      const transactionRows = document.getElementById("transaction-rows");
+      const ledRx = document.getElementById("led-rx");
+      const simulateRefreshBtn = document.getElementById("simulate-refresh-btn");
+      const pingNodeBtn = document.getElementById("ping-node-btn");
+      const quickReconnectBtn = document.getElementById("quick-reconnect-btn");
+      const clearLogsBtn = document.getElementById("clear-logs-btn");
+      const screenClock = document.getElementById("screen-clock");
+      const sessionTimer = document.getElementById("session-timer");
+
+      let elapsedSeconds = 6139;
+      setInterval(() => {
+        elapsedSeconds++;
+        const hrs = String(Math.floor(elapsedSeconds / 3600)).padStart(2, "0");
+        const mins = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, "0");
+        const secs = String(elapsedSeconds % 60).padStart(2, "0");
+        if (sessionTimer) sessionTimer.textContent = `${hrs}:${mins}:${secs}`;
+
+        const now = new Date();
+        const curH = String(now.getHours()).padStart(2, "0");
+        const curM = String(now.getMinutes()).padStart(2, "0");
+        const curS = String(now.getSeconds()).padStart(2, "0");
+        if (screenClock) screenClock.textContent = `${curH}:${curM}:${curS}`;
+      }, 1000);
+
+      function blinkLed() {
+        if (!ledRx) return;
+        ledRx.classList.remove("bg-emerald-400");
+        ledRx.classList.add("bg-white");
+        setTimeout(() => {
+          ledRx.classList.remove("bg-white");
+          ledRx.classList.add("bg-emerald-400");
+        }, 120);
+      }
+
+      function updateStatus(newKey) {
+        if (!STATUS_CONFIG[newKey]) return;
+        previousStatus = currentStatus;
+        currentStatus = newKey;
+        const cfg = STATUS_CONFIG[newKey];
+        const lecturerKey = lecturerSelect.value;
+        const lecturer = LECTURER_DATA[lecturerKey] || LECTURER_DATA.vance;
+
+        // Update 1-tap buttons styling
+        statusButtons.forEach(btn => {
+          const btnStatus = btn.getAttribute("data-status");
+          const checkIcon = btn.querySelector(".status-check");
+          if (btnStatus === newKey) {
+            btn.className = `status-btn active group text-left p-4 rounded-xl border-2 transition-all relative flex flex-col justify-between h-32 ${cfg.btnActiveBg} ${cfg.btnActiveBorder} shadow-xs`;
+            if (checkIcon) checkIcon.classList.remove("hidden");
+          } else {
+            btn.className = "status-btn group text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60 transition-all relative flex flex-col justify-between h-32 shadow-xs";
+            if (checkIcon) checkIcon.classList.add("hidden");
+          }
+        });
+
+        // Update banner
+        statusHeadlineText.textContent = cfg.headline;
+        statusHeadlineText.className = `text-base font-bold ${cfg.colorClass}`;
+        statusSubText.textContent = cfg.sub;
+
+        statusIconWrap.className = `w-11 h-11 rounded-lg ${cfg.iconBg} ${cfg.iconColor} flex items-center justify-center shrink-0`;
+        statusMainIcon.textContent = cfg.icon;
+
+        // Update Hardware Screen
+        screenStatusMain.textContent = cfg.screenTitle;
+        screenStatusSub.textContent = cfg.screenSub;
+        screenBadge.className = `w-full py-4 px-3 rounded border ${cfg.badgeBorder} ${cfg.badgeBg} ${cfg.badgeText} flex flex-col items-center justify-center transition-all duration-300`;
+        screenStatusSub.className = `text-xs tracking-wider uppercase mt-1 ${cfg.badgeSubText} font-medium`;
+
+        blinkLed();
+
+        // Calculate realistic latency
+        const latency = Math.floor(Math.random() * 20) + 18;
+        if (latencyCounter) latencyCounter.textContent = latency;
+
+        // Append to activity log
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}.${String(now.getMilliseconds()).padStart(3, "0")}`;
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50/80 transition-colors animate-fade";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-slate-500">${timeStr}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900">${lecturer.name} (${lecturer.room})</td>
+          <td class="py-3 px-4 text-slate-600">Web Dashboard (Lecturer Control)</td>
+          <td class="py-3 px-4 font-medium">
+            <span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[11px]">${previousStatus}</span>
+            <span class="text-slate-400 mx-1">→</span>
+            <span class="${cfg.colorClass} bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">${cfg.label.toUpperCase()}</span>
+          </td>
+          <td class="py-3 px-4 font-mono text-emerald-700 font-semibold">${latency}ms</td>
+          <td class="py-3 px-4">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              ACK_SUPABASE_OK #${Math.floor(Math.random() * 2000) + 7000}
+            </span>
+          </td>
+        `;
+        if (transactionRows) {
+          transactionRows.insertBefore(tr, transactionRows.firstChild);
+        }
+      }
+
+      // Button Click Bindings
+      statusButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const st = btn.getAttribute("data-status");
+          updateStatus(st);
+        });
+      });
+
+      // Custom Note Marquee
+      if (customNoteInput) {
+        customNoteInput.addEventListener("input", (e) => {
+          if (charCount) charCount.textContent = `${e.target.value.length} / 90`;
+        });
+      }
+
+      if (updateMarqueeBtn) {
+        updateMarqueeBtn.addEventListener("click", () => {
+          const text = customNoteInput.value.trim() || "Ready for office hours consultation";
+          if (marqueeStream) {
+            marqueeStream.textContent = `${text} • Verified Terminal Sync • Room Status Active`;
+          }
+          blinkLed();
+        });
+      }
+
+      // Lecturer Profile Switcher
+      if (lecturerSelect) {
+        lecturerSelect.addEventListener("change", (e) => {
+          const lecturer = LECTURER_DATA[e.target.value];
+          if (!lecturer) return;
+          if (screenLecturer) screenLecturer.textContent = lecturer.name.toUpperCase();
+          if (screenRoom) screenRoom.textContent = lecturer.room;
+          if (marqueeStream) marqueeStream.textContent = `Presence for ${lecturer.name} (${lecturer.dept}) • ${lecturer.room}`;
+          blinkLed();
+        });
+      }
+
+      // Test Buttons
+      if (simulateRefreshBtn) {
+        simulateRefreshBtn.addEventListener("click", () => {
+          blinkLed();
+          screenBadge.classList.add("opacity-50");
+          setTimeout(() => {
+            screenBadge.classList.remove("opacity-50");
+            if (latencyCounter) latencyCounter.textContent = Math.floor(Math.random() * 15) + 16;
+          }, 250);
+        });
+      }
+
+      const pingAction = () => {
+        blinkLed();
+        if (latencyCounter) latencyCounter.textContent = Math.floor(Math.random() * 10) + 18;
+      };
+
+      if (pingNodeBtn) pingNodeBtn.addEventListener("click", pingAction);
+      if (quickReconnectBtn) quickReconnectBtn.addEventListener("click", pingAction);
+
+      if (clearLogsBtn) {
+        clearLogsBtn.addEventListener("click", () => {
+          if (transactionRows) {
+            transactionRows.innerHTML = `
+              <tr>
+                <td colspan="6" class="py-4 px-4 text-center text-slate-400 italic">
+                  Local cache cleared. Ready for next incoming dispatch acknowledgment.
+                </td>
+              </tr>
+            `;
+          }
+        });
+      }
+    })();
+  </script>
+</body></html>
+
+<!-- Admin Panel - Faculty Registry & Hardware Administration (University Edition) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        font-family: 'Inter', sans-serif;
+      }
+      h1, h2, h3, h4, .font-heading {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+            },
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-40 w-full bg-white border-b border-slate-200 shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+<!-- Brand & Status -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="h-9 w-9 rounded-lg bg-brand-600 text-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl">account_balance</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-heading font-bold text-slate-900 text-base leading-tight">SmartFaculty IoT</span>
+<span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live Sync
+            </span>
+</div>
+<span class="text-xs text-slate-500 font-medium">Campus Academic Operations</span>
+</div>
+</div>
+<!-- Navigation links -->
+<nav class="hidden md:flex items-center gap-1 font-medium text-sm">
+<a class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Overview</a>
+<a class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Lecturer Control</a>
+<a class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">Student Directory</a>
+<a class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">IoT Nodes</a>
+<a aria-current="page" class="px-3 py-1.5 rounded-md text-brand-700 bg-brand-50 font-semibold border border-brand-200" href="#">Admin Registry</a>
+</nav>
+<!-- Right Metadata & Profile -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>4 Available</span>
+<span class="text-slate-300">|</span>
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span>2 Busy</span>
+</div>
+<div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Supabase Connected
+        </div>
+<div class="flex items-center pl-2 border-l border-slate-200 gap-2">
+<button class="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors" title="Documentation" type="button">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-semibold text-xs shadow-sm ring-2 ring-white">
+            AD
+          </div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Container -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+<!-- Page Title & Top Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1 border-b border-slate-200">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded border border-brand-200">
+            Administrative Management
+          </span>
+<span class="text-xs text-slate-500">• Central Terminal Mesh</span>
+</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Faculty Directory &amp; Hardware Administration</h1>
+<p class="text-sm text-slate-600 mt-1">Manage lecturer profiles, corridor display pairings, department assignments, and system telemetry.</p>
+</div>
+<div class="flex items-center gap-2.5 shrink-0">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium shadow-sm transition-colors" id="btnBulkSync">
+<span class="material-symbols-outlined text-[18px] text-slate-500">sync</span>
+          Sync All Displays
+        </button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium shadow-sm transition-colors" id="btnExport">
+<span class="material-symbols-outlined text-[18px] text-slate-500">file_download</span>
+          Export Data (CSV)
+        </button>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-sm transition-colors" id="btnOpenModal">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+          + Add New Faculty Member
+        </button>
+</div>
+</div>
+<!-- 4 KPI Cards (Academic Clean Style) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+<div class="flex items-center justify-between text-slate-500 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Total Registered</span>
+<span class="p-2 rounded-lg bg-slate-100 text-slate-700 material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight" id="kpiTotalCount">7</span>
+<span class="text-sm font-medium text-slate-600">Faculty Accounts</span>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[15px]">check_circle</span>
+          100% verified credentials
+        </div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+<div class="flex items-center justify-between text-slate-500 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-600">ESP32 Nodes Online</span>
+<span class="p-2 rounded-lg bg-slate-100 text-brand-600 material-symbols-outlined text-[20px]">router</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight">7 / 7</span>
+<span class="text-sm font-medium text-emerald-600">Active</span>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Corridor e-Paper Panels bound
+        </div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+<div class="flex items-center justify-between text-slate-500 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Status Updates Today</span>
+<span class="p-2 rounded-lg bg-slate-100 text-slate-700 material-symbols-outlined text-[20px]">swap_horiz</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight">48</span>
+<span class="text-sm font-medium text-slate-600">Transitions</span>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1 text-xs text-slate-500 font-medium">
+<span class="material-symbols-outlined text-[15px] text-brand-600">trending_up</span>
+          +14% vs yesterday morning
+        </div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+<div class="flex items-center justify-between text-slate-500 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-600">System Uptime</span>
+<span class="p-2 rounded-lg bg-slate-100 text-emerald-700 material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight">99.98%</span>
+<span class="text-xs font-medium text-slate-500">(Supabase Realtime)</span>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<span>Latency: 28ms avg</span>
+<span class="font-medium text-emerald-700">SSL Valid</span>
+</div>
+</div>
+</div>
+<!-- Faculty Management Table Section -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<!-- Filter Bar -->
+<div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative w-full sm:w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" id="searchInput" placeholder="Search faculty, office, or MAC..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<label class="text-xs font-semibold text-slate-600 shrink-0" for="deptDropdown">Department:</label>
+<select class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500" id="deptDropdown">
+<option value="all">All Departments (7)</option>
+<option value="Computer Science">Computer Science</option>
+<option value="Robotics &amp; AI">Robotics &amp; AI</option>
+<option value="Electrical Eng">Electrical Eng</option>
+<option value="Data Science">Data Science</option>
+</select>
+</div>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>Broadcast Active</span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-500">Auto-sync: 3000ms</span>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-200 bg-slate-100/70 text-slate-600 font-semibold text-xs uppercase tracking-wider">
+<th class="py-3 px-4">Faculty Member</th>
+<th class="py-3 px-4">Department</th>
+<th class="py-3 px-4">Office / Room</th>
+<th class="py-3 px-4">Paired ESP32 Terminal</th>
+<th class="py-3 px-4">Live Status</th>
+<th class="py-3 px-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-sm" id="facultyTableBody">
+<!-- Row 1 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Computer Science" data-id="1">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Prof. Alan Vance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOQTqevSzYxr3-XWOpqGEg87cqBFiCexBraHp4EFygusRi1TGXDlqYFYpenZzK0m2nSzzC1-a7kiesEU-oJ8N6MqEb9XoP-u9G-Coi4_1Z88XDychWEr1oavwSpB-v-BOsujrT7pY-_UVdhHFIos0hPjCB4E4G9t17ypo8bnlhPD9tVJvhdx6HeKVnJcPx3Cwe5Izs49q5q8YZ8NMmox2AuSpWw-6r7ZMeEq7X6xSVhv1nAXM38_sS"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Prof. Alan Vance</div>
+<div class="text-xs text-slate-500">alan.vance@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Computer Science
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 402-A</span>
+<span class="text-xs text-slate-600 block">(CS Tower, 4F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    24:6F:28:AB:01:99
+                  </span>
+<span class="text-xs text-slate-600">ESP32-S3 • Ping 22ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-emerald-50 text-emerald-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Prof. Alan Vance')">
+<option selected="" value="Available">● Available</option>
+<option value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(1)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('24:6F:28:AB:01:99', 'Prof. Alan Vance')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Prof. Alan Vance')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Robotics &amp; AI" data-id="2">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Dr. Elena Rostova" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq3JoGNDoRkSJeYeEbNUgeQLxjYD5wOoeTJl7DV60TrWwIn4gKSo0krzgXk48nlL9MUhfFHjbyIYDTrNo_9AWnW1hc47aVLUwY0igD9r0NZuBW0tDeEgfh5GAreQYv8bulAztKKkXAFrjjk5CMBx9f6N6-KezN56tqWv3tn1LhIApdVBZ4Ak5smyRn3dLRQgQvDY2mH6wUoFVYmnEqrKrNNAlqeXLp32SIf69cOi8Ne8jkC0UG4A-g"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Dr. Elena Rostova</div>
+<div class="text-xs text-slate-500">e.rostova@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Robotics &amp; AI
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 118-B</span>
+<span class="text-xs text-slate-600 block">(Robotics Lab, 1F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    3C:71:BF:91:02:14
+                  </span>
+<span class="text-xs text-slate-600">ESP32-WROOM • Ping 19ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-amber-50 text-amber-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Dr. Elena Rostova')">
+<option value="Available">● Available</option>
+<option selected="" value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(2)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('3C:71:BF:91:02:14', 'Dr. Elena Rostova')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Dr. Elena Rostova')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Computer Science" data-id="3">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Assoc. Prof. Kenji Sato" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuSw8xz9WjeMjO-2gFaJ78LRyK9Ptu4dyf8sQELhxhq0p2CBz6ZNxlXx7XCqXExG5LfFYwcVWwHbEDdeOHh0nBvsAaLAT4Ghn837j4s6vWScdm1ibjTCsMITKIJgaDiON_XMbZCbBgNCmR1xUOg3BoNrLMKW6fMoKpEYsmuZbJfcBb2YR8wZ8tusvxsEGjj2SOJHEtRefGebRddmFUi0kQsx-cZeiuYq-OdhHalizN5NUBcpe4tUOf"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Assoc. Prof. Kenji Sato</div>
+<div class="text-xs text-slate-500">k.sato@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Computer Science
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 408</span>
+<span class="text-xs text-slate-600 block">(CS Tower, 4F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    A4:CF:12:7E:88:42
+                  </span>
+<span class="text-xs text-slate-600">ESP32-S3 • Ping 31ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-sky-50 text-sky-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Assoc. Prof. Kenji Sato')">
+<option value="Available">● Available</option>
+<option value="Busy">● Busy / Meeting</option>
+<option selected="" value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(3)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('A4:CF:12:7E:88:42', 'Assoc. Prof. Kenji Sato')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Assoc. Prof. Kenji Sato')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Electrical Eng" data-id="4">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Dr. Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiW1nvtC955TG7GwXzMudX-iw1GpjaHQFJJ9qrc-RMEnb3ptE-Fcu5GlCuqf5eoPaiItw6WcmE1AXAgT26ZyW4RVTA2sPcolDiKRrWINLG1oISqFl1n3OcPj7xkgXX1JpJpByG3ZxQDhISdWpYcice3hbhhguxmIrHmH112JP7jEDlk92tWDzxN7lZ13sdWD1eX1DvNUAXeiIxCc_AYYJR7VdxxoW6_bJ-V74c5fk8FAWgXHyxqest"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Dr. Sarah Jenkins</div>
+<div class="text-xs text-slate-500">s.jenkins@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Electrical Eng
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 205</span>
+<span class="text-xs text-slate-600 block">(Circuits Hall, 2F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    58:BF:25:34:CD:05
+                  </span>
+<span class="text-xs text-slate-600">ESP32-C3 • Ping 14ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-emerald-50 text-emerald-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Dr. Sarah Jenkins')">
+<option selected="" value="Available">● Available</option>
+<option value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(4)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('58:BF:25:34:CD:05', 'Dr. Sarah Jenkins')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Dr. Sarah Jenkins')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Data Science" data-id="5">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Dr. Marcus Adebayo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCw5C80tmwaZdvJ3Nmg20tgH4XdcgioauXym9ycfQIiYgNf09sBv8MmjX6tcobLOhQPryINcK3qUhf6IpsWstkc5hE5tmEyvcX7scZuwZvgcn4X0vdjFjwg1BBpxvlV9lCCiiTNhrY55t4TVWxM5bZEH_TuTRgr8CjJtNswpOX-QwmfCdqJEZMWORifNgoZQNBXkEKpQnHfJIWlHIv0Dr2As8V9RfVP4peF4dwpgCsEsWZoqIakbV5q"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Dr. Marcus Adebayo</div>
+<div class="text-xs text-slate-500">m.adebayo@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Data Science
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 310</span>
+<span class="text-xs text-slate-600 block">(Analytics Annex, 3F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    E0:5A:1B:77:2F:10
+                  </span>
+<span class="text-xs text-slate-600">ESP32-S3 • Ping 26ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-emerald-50 text-emerald-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Dr. Marcus Adebayo')">
+<option selected="" value="Available">● Available</option>
+<option value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(5)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('E0:5A:1B:77:2F:10', 'Dr. Marcus Adebayo')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Dr. Marcus Adebayo')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Robotics &amp; AI" data-id="6">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Priestley Chen, MSc" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFfDFTCUZUf6RgQ4q4s2KiTfOdaa_a-V1ZxvYsnTqN6pz3E0oTGPcLAgo6cm7Ri4FyHX7ywm_TeOxE1YHjm-HXayjFyZoaw-ia_hqlWxpUI_1FXiO9IzTiO_CkvZw5eBkadK7iFIJRiISB_3buRtLyIN6GHD5Wi3PuRrQjfp7L_-8tNV8RbeIQTrqRtas3v6EHF_CjwrZPxs4ZTdAwQUUYthkWEoqsLhiFbGzCpZAFo-0s3mAWOU_i"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Priestley Chen, MSc</div>
+<div class="text-xs text-slate-500">p.chen@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Robotics &amp; AI
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 122</span>
+<span class="text-xs text-slate-600 block">(Robotics Lab, 1F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    7C:DF:A1:EE:51:B2
+                  </span>
+<span class="text-xs text-slate-600">ESP32-WROOM • Ping 20ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-amber-50 text-amber-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Priestley Chen, MSc')">
+<option value="Available">● Available</option>
+<option selected="" value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(6)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('7C:DF:A1:EE:51:B2', 'Priestley Chen, MSc')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Priestley Chen, MSc')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 7 -->
+<tr class="faculty-row hover:bg-slate-50/80 transition-colors" data-dept="Computer Science" data-id="7">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Dean Arthur Pendelton" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkXE0SFPtUxiDpoDglJTE9K1jl9NeFGXInXZzpk5F3lyRtD6ccUXsWv-ZsIa0eTa3YDLJVAQSxvAGmBkGe5xWPf8UOEnuboWBOASHNllRGE01Ha6VeW7jlanCac0hBf7DA8bzmvpTVVcpclE9Scz-m2aMAlGhZ10-NeRKjuO3WevkH-ZIin3doOqrp6kVV1aux0oi1B2dCNsWcjv2cUAU5BYRex3FqrYQgJBluUBwiuKWJ6f4KV94G"/>
+</div>
+<div>
+<div class="font-semibold text-slate-900 leading-snug">Dean Arthur Pendelton</div>
+<div class="text-xs text-slate-500">dean.pendelton@faculty.iot</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  Computer Science
+                </span>
+</td>
+<td class="py-3.5 px-4 text-slate-700">
+<span class="font-medium text-slate-900">Room 501-Dean</span>
+<span class="text-xs text-slate-600 block">(Executive Suite, 5F)</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex flex-col">
+<span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    BC:DD:C2:44:8A:77
+                  </span>
+<span class="text-xs text-slate-600">ESP32-S3 Pro • Ping 16ms</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<select class="status-select rounded-md border border-slate-200 bg-emerald-50 text-emerald-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, 'Dean Arthur Pendelton')">
+<option selected="" value="Available">● Available</option>
+<option value="Busy">● Busy / Meeting</option>
+<option value="In Lecture">● In Lecture</option>
+<option value="Away">● Office Closed</option>
+</select>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(7)" title="Edit Faculty">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('BC:DD:C2:44:8A:77', 'Dean Arthur Pendelton')" title="Sync Display Node">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+<button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, 'Dean Arthur Pendelton')" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination Info -->
+<div class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2 bg-slate-50/50">
+<span id="facultyCountLabel">Showing 7 of 7 registered faculty entries</span>
+<div class="flex items-center gap-2">
+<span>Active Central Database Sync</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</div>
+</div>
+</div>
+<!-- Telemetry & System Audit Log Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-slate-100 text-slate-700">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</div>
+<div>
+<h2 class="text-base font-bold text-slate-900 leading-tight">System Audit &amp; Hardware Telemetry</h2>
+<p class="text-xs text-slate-500">WebSocket channel <span class="font-mono text-slate-700">faculty-presence-live</span> • Supabase Realtime synchronization receipts</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            CONNECTED (WSS)
+          </span>
+<button class="text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 py-1 rounded-md border border-slate-200 hover:bg-slate-50 transition-colors" id="btnClearLogs">
+            Clear Log
+          </button>
+</div>
+</div>
+<!-- Log Entries Container -->
+<div class="h-44 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3.5 font-mono text-xs text-slate-700 space-y-2 select-text" id="telemetryTerminal">
+<div class="flex items-start gap-2">
+<span class="text-slate-400 shrink-0">[11:42:01.082]</span>
+<span class="text-brand-600 font-semibold shrink-0">[INFO]</span>
+<span>Supabase Realtime channel subscribed: faculty-nodes-broadcast</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-slate-400 shrink-0">[11:42:01.119]</span>
+<span class="text-emerald-600 font-semibold shrink-0">[HEARTBEAT]</span>
+<span>MAC 24:6F:28:AB:01:99 (Prof. Alan Vance) reported RSSI: -48dBm | Battery: 98%</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-slate-400 shrink-0">[11:42:03.490]</span>
+<span class="text-slate-600 font-semibold shrink-0">[MQTT-ACK]</span>
+<span>ESP32 Node 3C:71:BF:91:02:14 refreshed e-paper framebuffer successfully (0.42s render)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-slate-400 shrink-0">[11:42:06.120]</span>
+<span class="text-amber-600 font-semibold shrink-0">[PRESENCE-SYNC]</span>
+<span>Manual status query completed. All 7 hardware nodes confirmed in-sync.</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Clean Modal for Add / Edit Faculty -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden transition-opacity duration-200" id="lecturerModal">
+<div class="relative w-full max-w-xl mx-4 rounded-xl bg-white p-6 shadow-xl border border-slate-200 space-y-5">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div>
+<h3 class="text-lg font-bold text-slate-900" id="modalTitle">Add New Faculty Member</h3>
+<p class="text-xs text-slate-500">Register faculty identity and bind corridor ESP32 e-Paper hardware.</p>
+</div>
+<button class="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" id="btnCloseModal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="space-y-4" id="facultyForm">
+<input id="editRowId" type="hidden" value=""/>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="fullName">Full Name</label>
+<input class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="fullName" placeholder="e.g. Dr. Maya Lin" required="" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="academicTitle">Academic Title</label>
+<input class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="academicTitle" placeholder="e.g. Senior Lecturer / Lab Lead" required="" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="deptSelect">Department</label>
+<select class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white" id="deptSelect">
+<option value="Computer Science">Computer Science</option>
+<option value="Robotics &amp; AI">Robotics &amp; AI</option>
+<option value="Electrical Eng">Electrical Eng</option>
+<option value="Data Science">Data Science</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="roomNumber">Room / Office</label>
+<input class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="roomNumber" placeholder="e.g. Room 412 (North Wing)" required="" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="email">Email Address</label>
+<input class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="email" placeholder="m.lin@faculty.iot" required="" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700" for="officeHours">Office Hours</label>
+<input class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="officeHours" placeholder="e.g. Tue/Thu 14:00 - 16:00" type="text"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-700 flex items-center justify-between" for="esp32Mac">
+<span>ESP32 Device MAC Address Binding</span>
+<span class="text-[11px] font-normal text-slate-500">Format: XX:XX:XX:XX:XX:XX</span>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">developer_board</span>
+<input class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" id="esp32Mac" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$" placeholder="48:55:19:EA:09:F2" required="" type="text"/>
+</div>
+<p class="text-[11px] text-slate-500">The e-Paper display with this MAC address will automatically sync with this faculty profile.</p>
+</div>
+<div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+<button class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors" id="btnCancelModal" type="button">
+            Cancel
+          </button>
+<button class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-sm transition-colors" type="submit">
+            Save Faculty Record
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Toast Notification -->
+<div class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 rounded-lg bg-slate-900 text-white px-4 py-3 shadow-lg flex items-center gap-3 border border-slate-800 max-w-sm" id="toastNotification">
+<span class="material-symbols-outlined text-emerald-400 text-[20px]" id="toastIcon">check_circle</span>
+<div class="flex flex-col">
+<span class="text-xs font-bold leading-tight" id="toastTitle">Notification</span>
+<span class="text-xs text-slate-300" id="toastMessage">Update successful</span>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-auto w-full bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+<div>
+<span class="font-semibold text-slate-700">SmartFaculty Administrative Portal</span> — University IoT Presence Ecosystem
+      </div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Gateway: campus-node-01 (24ms)
+        </span>
+<span class="text-slate-300">|</span>
+<span>Supabase Realtime API v2</span>
+</div>
+</div>
+</footer>
+<!-- Application Logic -->
+<script>
+    function appendLog(type, text) {
+      const term = document.getElementById('telemetryTerminal');
+      if (!term) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      const logItem = document.createElement('div');
+      logItem.className = 'flex items-start gap-2';
+
+      let tagColor = 'text-brand-600';
+      if (type === 'WARN') tagColor = 'text-amber-600';
+      if (type === 'ERROR' || type === 'DELETE') tagColor = 'text-rose-600';
+      if (type === 'SUCCESS' || type === 'HEARTBEAT') tagColor = 'text-emerald-600';
+
+      logItem.innerHTML = `
+        <span class="text-slate-400 shrink-0">[${timeStr}]</span>
+        <span class="${tagColor} font-semibold shrink-0">[${type}]</span>
+        <span>${text}</span>
+      `;
+      term.appendChild(logItem);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function showToast(title, message, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastTitle.textContent = title;
+      toastMsg.textContent = message;
+      
+      if (isError) {
+        toastIcon.textContent = 'error';
+        toastIcon.className = 'material-symbols-outlined text-rose-400 text-[20px]';
+      } else {
+        toastIcon.textContent = 'check_circle';
+        toastIcon.className = 'material-symbols-outlined text-emerald-400 text-[20px]';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    function handleStatusChange(selectElem, name) {
+      const val = selectElem.value;
+      // Reset color classes
+      selectElem.className = 'status-select rounded-md border border-slate-200 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer ';
+      
+      if (val === 'Available') {
+        selectElem.className += 'bg-emerald-50 text-emerald-800';
+      } else if (val === 'Busy') {
+        selectElem.className += 'bg-amber-50 text-amber-800';
+      } else if (val === 'In Lecture') {
+        selectElem.className += 'bg-sky-50 text-sky-800';
+      } else {
+        selectElem.className += 'bg-rose-50 text-rose-800';
+      }
+
+      appendLog('PRESENCE-SYNC', `Admin adjusted status for ${name} -> ${val.toUpperCase()}`);
+      showToast('Status Updated', `${name} is marked as ${val}. ESP32 display refreshed.`);
+    }
+
+    function resetNode(mac, lecturerName) {
+      appendLog('SYNC', `Manual framebuffer refresh dispatched to ${mac} (${lecturerName})`);
+      showToast('Hardware Synchronized', `Dispatched refresh frame to node ${mac}.`);
+    }
+
+    function deleteLecturer(buttonElement, name) {
+      if (confirm(`Remove ${name} from directory and decouple the associated ESP32 display?`)) {
+        const row = buttonElement.closest('tr');
+        row.remove();
+        updateFacultyCount();
+        appendLog('DELETE', `Faculty member ${name} and bound hardware node dissociated.`);
+        showToast('Faculty Removed', `${name} has been removed.`);
+      }
+    }
+
+    function updateFacultyCount() {
+      const visibleRows = document.querySelectorAll('#facultyTableBody .faculty-row:not([style*="display: none"])');
+      const totalRows = document.querySelectorAll('#facultyTableBody .faculty-row');
+      const label = document.getElementById('facultyCountLabel');
+      if (label) {
+        label.textContent = `Showing ${visibleRows.length} of ${totalRows.length} registered faculty entries`;
+      }
+      const kpi = document.getElementById('kpiTotalCount');
+      if (kpi) {
+        kpi.textContent = totalRows.length;
+      }
+    }
+
+    // Modal Handlers
+    const modal = document.getElementById('lecturerModal');
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const btnCancelModal = document.getElementById('btnCancelModal');
+    const facultyForm = document.getElementById('facultyForm');
+
+    function openModal(isEdit = false) {
+      modal.classList.remove('hidden');
+      if (!isEdit) {
+        document.getElementById('modalTitle').textContent = 'Add New Faculty Member';
+        facultyForm.reset();
+        document.getElementById('editRowId').value = '';
+      }
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+    }
+
+    btnOpenModal.addEventListener('click', () => openModal(false));
+    btnCloseModal.addEventListener('click', closeModal);
+    btnCancelModal.addEventListener('click', closeModal);
+
+    function editLecturer(id) {
+      const row = document.querySelector(`.faculty-row[data-id="${id}"]`);
+      if (!row) return;
+
+      const name = row.querySelector('.font-semibold.text-slate-900').textContent.trim();
+      const email = row.querySelector('.text-slate-500').textContent.trim();
+      const dept = row.getAttribute('data-dept');
+      const room = row.querySelector('td:nth-child(3) .font-medium').textContent.trim();
+      const mac = row.querySelector('td:nth-child(4) .font-mono').textContent.trim();
+
+      document.getElementById('modalTitle').textContent = `Edit Profile: ${name}`;
+      document.getElementById('editRowId').value = id;
+      document.getElementById('fullName').value = name;
+      document.getElementById('academicTitle').value = 'Faculty Member';
+      document.getElementById('deptSelect').value = dept;
+      document.getElementById('roomNumber').value = room;
+      document.getElementById('email').value = email;
+      document.getElementById('esp32Mac').value = mac;
+
+      openModal(true);
+    }
+
+    facultyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value;
+      const dept = document.getElementById('deptSelect').value;
+      const room = document.getElementById('roomNumber').value;
+      const mac = document.getElementById('esp32Mac').value;
+      const editId = document.getElementById('editRowId').value;
+      const email = document.getElementById('email').value;
+
+      if (editId) {
+        const row = document.querySelector(`.faculty-row[data-id="${editId}"]`);
+        if (row) {
+          row.querySelector('.font-semibold.text-slate-900').textContent = name;
+          row.setAttribute('data-dept', dept);
+          row.querySelector('td:nth-child(2) span').textContent = dept;
+          row.querySelector('td:nth-child(3)').innerHTML = `<span class="font-medium text-slate-900">${room}</span><span class="text-xs text-slate-600 block">(Faculty Office)</span>`;
+          row.querySelector('td:nth-child(4) .font-mono').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${mac}`;
+          row.querySelector('td:nth-child(1) .text-slate-500').textContent = email;
+        }
+        appendLog('UPDATE', `Updated faculty configuration for ${name} [${mac}]`);
+        showToast('Record Updated', `Profile and hardware settings saved for ${name}.`);
+      } else {
+        const tbody = document.getElementById('facultyTableBody');
+        const newId = Date.now();
+        const newRow = document.createElement('tr');
+        newRow.className = 'faculty-row hover:bg-slate-50/80 transition-colors';
+        newRow.setAttribute('data-dept', dept);
+        newRow.setAttribute('data-id', newId);
+
+        const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('');
+
+        newRow.innerHTML = `
+          <td class="py-3.5 px-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs shrink-0 border border-brand-200">
+                ${initials || 'FC'}
+              </div>
+              <div>
+                <div class="font-semibold text-slate-900 leading-snug">${name}</div>
+                <div class="text-xs text-slate-500">${email}</div>
+              </div>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+              ${dept}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-700">
+            <span class="font-medium text-slate-900">${room}</span>
+            <span class="text-xs text-slate-600 block">(Faculty Office)</span>
+          </td>
+          <td class="py-3.5 px-4">
+            <div class="flex flex-col">
+              <span class="font-mono text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                ${mac}
+              </span>
+              <span class="text-xs text-slate-600">ESP32 Provisioned</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <select class="status-select rounded-md border border-slate-200 bg-emerald-50 text-emerald-800 font-semibold text-xs py-1 px-2.5 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer" onchange="handleStatusChange(this, '${name}')">
+              <option selected value="Available">● Available</option>
+              <option value="Busy">● Busy / Meeting</option>
+              <option value="In Lecture">● In Lecture</option>
+              <option value="Away">● Office Closed</option>
+            </select>
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <div class="flex items-center justify-end gap-1">
+              <button class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-slate-100 transition-colors" onclick="editLecturer(${newId})" title="Edit Faculty">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </button>
+              <button class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" onclick="resetNode('${mac}', '${name}')" title="Sync Display Node">
+                <span class="material-symbols-outlined text-[18px]">sync</span>
+              </button>
+              <button class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" onclick="deleteLecturer(this, '${name}')" title="Delete">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.prepend(newRow);
+        appendLog('CREATE', `New faculty registered: ${name} bound to ESP32 node [${mac}]`);
+        showToast('Faculty Added', `${name} registered and paired with node.`);
+      }
+
+      updateFacultyCount();
+      closeModal();
+    });
+
+    // Department Filter Dropdown
+    document.getElementById('deptDropdown').addEventListener('change', (e) => {
+      const selectedDept = e.target.value;
+      const rows = document.querySelectorAll('#facultyTableBody .faculty-row');
+      rows.forEach(row => {
+        if (selectedDept === 'all' || row.getAttribute('data-dept') === selectedDept) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      updateFacultyCount();
+    });
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#facultyTableBody .faculty-row');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(q)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      updateFacultyCount();
+    });
+
+    // Bulk Sync button
+    document.getElementById('btnBulkSync').addEventListener('click', () => {
+      appendLog('BULK-SYNC', 'Triggered broadcast synchronization packet across all paired ESP32 nodes.');
+      showToast('Broadcasting Hardware Sync', 'Refreshing e-Paper displays across campus wings.');
+      setTimeout(() => {
+        appendLog('SUCCESS', 'Cluster sync completed. 7/7 nodes returned zero errors.');
+      }, 1000);
+    });
+
+    // Export CSV
+    document.getElementById('btnExport').addEventListener('click', () => {
+      appendLog('EXPORT', 'Admin generated CSV audit export: faculty_directory_export.csv');
+      showToast('Export Generated', 'CSV download prepared.');
+    });
+
+    // Clear logs button
+    document.getElementById('btnClearLogs').addEventListener('click', () => {
+      document.getElementById('telemetryTerminal').innerHTML = '';
+      appendLog('INFO', 'Telemetry log buffer cleared by administrator.');
+    });
+  </script>
+</body></html>
+
+<!-- Live Campus Directory - Student View (University Edition) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<title>Faculty Availability Directory - SmartFaculty IoT</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { -webkit-font-smoothing: antialiased; }
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af'
+            },
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 font-sans min-h-screen flex flex-col">
+<!-- Universal University Portal Header -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-slate-200">
+<div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+<!-- Portal Brand Identity -->
+<div class="flex items-center gap-3 shrink-0">
+<img alt="SmartFaculty IoT Logo" class="h-8 w-auto object-contain rounded" src="https://lh3.googleusercontent.com/aida/AEtjO1VkwRuBDhsons6fRxhVL2nRLfO0cWCzvSDXT2VD4NY600bGOZnAQp2lrve3_ljX1Le0-JjbMBo_H3yaGAnUTP4fx3Unx_S3xJUaqKpZu5lni7GTe7RQQzAMYbRfl07cYWHTwZlv8s-BYD4ffBV14jbyk5A_bVPTXBB_cy0eimQjlSg8GE8eWgd38iojQ4QQHGo06aue3cAoVBsWKb3jHN7yFqjzsVb0o8aUrQdMhdidT9S-oWODCrUDRQ"/>
+<div class="flex flex-col">
+<span class="font-display font-bold text-slate-900 text-base leading-tight tracking-tight">SmartFaculty IoT</span>
+<span class="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            ESP32 Campus Network
+          </span>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="hidden md:flex items-center gap-1" data-active-classes="bg-brand-50 text-brand-700 font-semibold rounded-md">
+<a class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" data-path="overview-role-select" href="#">Overview / Role Select</a>
+<a class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" data-path="lecturer-control" href="#">Lecturer Control</a>
+<a aria-current="page" class="px-3 py-1.5 text-xs font-semibold bg-brand-50 text-brand-700 rounded-md transition-colors" data-path="student-directory" href="#">Student Directory</a>
+<a class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" data-path="iot-esp32-terminal" href="#">IoT ESP32 Terminal</a>
+<a class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" data-path="admin-registry" href="#">Admin Registry</a>
+</nav>
+<!-- Right Header Status & Profile -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-medium text-emerald-800">Supabase Connected</span>
+</div>
+<div class="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center font-medium text-xs">
+          ST
+        </div>
+</div>
+</div>
+</header>
+<!-- Main Body Content Area -->
+<main class="w-full pt-16 flex-1">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+<!-- Directory Header Banner -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-slate-200">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 mb-2">
+<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            Real-time Telemetry Synchronized
+          </div>
+<h1 class="font-display text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Faculty Availability Directory</h1>
+<p class="text-sm sm:text-base text-slate-600 mt-1 max-w-2xl">Search, filter, and inspect real-time availability of university professors and teaching staff.</p>
+</div>
+<div class="flex items-center gap-2 self-start sm:self-auto text-xs text-slate-500 bg-white border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm">
+<span class="font-medium text-slate-700">Campus Relay:</span>
+<span>Dual PIR + Door Sensors Active</span>
+</div>
+</div>
+<!-- Controls Hub: Search & Filter Pills -->
+<div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+<!-- Search Bar Row -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full bg-white border border-slate-200 text-slate-900 text-sm pl-10 pr-28 py-2.5 rounded-lg placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition" id="faculty-search-input" placeholder="Search faculty by name, room, course, or department..." type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center pointer-events-none">
+<kbd class="px-2 py-0.5 text-[11px] font-medium bg-slate-100 border border-slate-200 rounded text-slate-500">Press / to search</kbd>
+</div>
+</div>
+<!-- Status Summary Chips (Filterable) -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" id="status-filters">
+<button class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white transition whitespace-nowrap shadow-sm" data-filter="all">
+              All (7)
+            </button>
+<button class="status-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5 whitespace-nowrap" data-filter="available">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>Available (4)
+            </button>
+<button class="status-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5 whitespace-nowrap" data-filter="busy">
+<span class="h-2 w-2 rounded-full bg-amber-500"></span>Busy (2)
+            </button>
+<button class="status-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5 whitespace-nowrap" data-filter="away">
+<span class="h-2 w-2 rounded-full bg-rose-500"></span>Not Available (1)
+            </button>
+</div>
+</div>
+<!-- Academic Department Filter Pills -->
+<div class="flex items-center gap-2 overflow-x-auto pt-1" id="dept-filters">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0 pr-1">Departments:</span>
+<button class="dept-chip px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white transition whitespace-nowrap" data-dept="all">
+            All Departments
+          </button>
+<button class="dept-chip px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition whitespace-nowrap" data-dept="Computer Science">
+            Computer Science
+          </button>
+<button class="dept-chip px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition whitespace-nowrap" data-dept="Robotics &amp; AI">
+            Robotics &amp; AI
+          </button>
+<button class="dept-chip px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition whitespace-nowrap" data-dept="Electrical Engineering">
+            Electrical Engineering
+          </button>
+<button class="dept-chip px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition whitespace-nowrap" data-dept="Data Science">
+            Data Science
+          </button>
+</div>
+</div>
+<!-- Real-Time Faculty Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="faculty-grid">
+<!-- Card 1: Dr. Alan Vance -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Computer Science" data-name="Dr. Alan Vance" data-room="Room 402 - Distributed Systems Lab" data-status="available">
+<div class="space-y-4">
+<!-- Header: Avatar, Name, Title, Clean Badge -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Dr. Alan Vance, professor in distributed computing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0X-SaIp4C_bNyeDxHfYJ9sdWq-uwrhB5CaVHRgZRWGThQse9DNnkjS_Hif016ehkMftJL78dD8RdiLcfB7JB8uUVXQ1PHhGJYTgmMJax4hlKYhvFdoRgV3Mq5P95kFCpQfWaBSw24-V506pSwHg-rxROqKF31rqfJ9wrLeddzPR7LwkszGsgu7Yw1yAXT2FqrFs0hf4Qm0rwirF59bcYG-7BN4faEe5b1RchgqoyimRN7PaDvk-4J"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Dr. Alan Vance</h3>
+<p class="text-xs font-medium text-slate-500">Professor • Computer Science</p>
+</div>
+</div>
+<!-- Green Available Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Available
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 402 - Distributed Systems Lab
+                </span>
+<span class="text-[11px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">Motion Detected</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 14:00 - 17:00
+                </span>
+<span class="text-emerald-700 font-semibold">Walk-ins Welcome</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Consulting for CSE408 IoT Capstone students. Step in directly.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openScheduleModal('Dr. Alan Vance', 'Room 402 - Distributed Systems Lab')">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Schedule Appointment
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Building B - 4th Floor', 'Room 402', 'Dr. Alan Vance')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Dr. Alan Vance')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 2: Prof. Elena Rostova -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Data Science" data-name="Prof. Elena Rostova" data-room="Room 310 - Turing AI Center" data-status="busy">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Prof. Elena Rostova" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAevVDV8yHaCwSCRZuHTBNe4VrMyG59VtTBJxv-jgwWEr_6W2HY40daUOZKQCGAsHna2wSqfHlmhSEqfelWtepI0ArT1iG8Wcg4dTmpT2RRr42OrTYgjKbmxXtNnXhp40Mf5AciXQokt_KNgUY91xiBCs-r4Ncde9UC94a7RFaEfFjzyXqZTVY7f3f-T5kMz56d0emNR5E7feAHABvoVCupICicSJBqW_XLuruVdalRCjqsZC9kumQy"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Prof. Elena Rostova</h3>
+<p class="text-xs font-medium text-slate-500">Dept Chair • Data Science</p>
+</div>
+</div>
+<!-- Amber Busy Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                Busy
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 310 - Turing AI Center
+                </span>
+<span class="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">In Consultation</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 13:00 - 16:30
+                </span>
+<span class="text-amber-700 font-semibold">2 In Queue (~15m)</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Currently reviewing deep learning grant proposals. Please join queue for 10m slots.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openQueueModal('Prof. Elena Rostova', 2)">
+<span class="material-symbols-outlined text-[16px]">group_add</span>
+              Join Virtual Queue (#3)
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Turing Tower - 3rd Floor', 'Room 310', 'Prof. Elena Rostova')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Prof. Elena Rostova')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 3: Dr. Marcus Chen -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Electrical Engineering" data-name="Dr. Marcus Chen" data-room="Room 204 - Hardware Wing" data-status="available">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Dr. Marcus Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAA3MvZYTiSKCxEMPL0UVoO1lrLsR1BRaAB6vzcdWLfaqu7vUhE7QgAmcPhzsVOs5dRAK1I-jGKnYF-WgBtbHmtcvjy340UFVRs32HO98QzyPWPdlkoCyDO6Hctcu0x6M34gjMpSl73tXLR71_MwS1gpkrQC4IKwz1S_vFEQTnHpMfhg2GvAKz7YS1DfhtnIyrVmLzOhQcbUyLcdm9lf22ue68mmtgQVFJbQdf8xuuyrN_tU93qEqrn"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Dr. Marcus Chen</h3>
+<p class="text-xs font-medium text-slate-500">Associate Professor • Electrical Engineering</p>
+</div>
+</div>
+<!-- Green Available Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Available
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 204 - Hardware Wing
+                </span>
+<span class="text-[11px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">ESP32 Sync: 12ms</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 13:00 - 18:00
+                </span>
+<span class="text-emerald-700 font-semibold">Lab Active</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Hardware lab open for thesis review and ESP32 board checkout. Oscilloscopes ready.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openScheduleModal('Dr. Marcus Chen', 'Room 204 - Hardware Wing')">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Schedule Appointment
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Hardware Wing - 2nd Floor', 'Room 204', 'Dr. Marcus Chen')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Dr. Marcus Chen')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 4: Dr. Sarah Jenkins -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Computer Science" data-name="Dr. Sarah Jenkins" data-room="Room 512 - Innovation Hub" data-status="away">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Dr. Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3pTpFJ7jp9geZF9fNADzdmo69020KpqskBKq-5puVh5LY_1tEcsWpP0UGQUKYbyb6CYuN6qliKhCEvzCqvcKn77V490VGNekRq_ewUaUa6d4qlgFV5iGX_m96misYABfJE_3Mf1IND0KnMU3GhkH7mLZ6C-mR8VYqArsfZbBG81Zqt33z_5wQLwLoxtSJCBKFk9wVyfJyY4YdZtkkNNDHRyOdGyp-uFSUn5xiUC3yZR6-gmai68mQ"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Dr. Sarah Jenkins</h3>
+<p class="text-xs font-medium text-slate-500">Senior Lecturer • Computer Science</p>
+</div>
+</div>
+<!-- Red Not Available Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                Not Available
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 512 - Innovation Hub
+                </span>
+<span class="text-[11px] font-medium text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Lecture: Hall C</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Returns: 16:00
+                </span>
+<span class="text-slate-500">Office hours after class</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Currently teaching HCI-301 in Lecture Hall C. Office hours resume immediately afterwards.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openScheduleModal('Dr. Sarah Jenkins', 'Room 512 - Innovation Hub')">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Book Next Slot (16:15)
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Innovation Hub - 5th Floor', 'Room 512 &amp; Hall C', 'Dr. Sarah Jenkins')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Dr. Sarah Jenkins')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 5: Dr. Priya Sharma -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Computer Science" data-name="Dr. Priya Sharma" data-room="Room 305 - Cyber Security Lab" data-status="available">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Dr. Priya Sharma" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDl_IY3uEGhMUZAU6aoa5xHy4utfQyUkMCCDAmyUpS_WFW_KiCf3IMeJcmhD0zQC08yYUR0TEJvkALf0nZRv09WILqfGcJTEEHKly98QdkJ5OR2OjYFRsnImN56wH8BIRFiLphvVqGuHufNcWHr8psE4huiwLwNo52TMiIeuLc1VGV4q4CiVI8nFLecAT8ZnzqOhjn_u05_Qwupw3EFEJP9DCFIUJtlBC2qmWsO3TWGRQWS8CPqBWHU"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Dr. Priya Sharma</h3>
+<p class="text-xs font-medium text-slate-500">Associate Professor • Computer Science</p>
+</div>
+</div>
+<!-- Green Available Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Available
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 305 - Cyber Security Lab
+                </span>
+<span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Door Open</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 11:00 - 16:30
+                </span>
+<span class="text-emerald-700 font-semibold">Queue: 0 Waiting</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Available for network defense lab inquiries and ethical hacking final paper approvals.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openScheduleModal('Dr. Priya Sharma', 'Room 305 - Cyber Security Lab')">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Schedule Appointment
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Tech Center - 3rd Floor', 'Room 305', 'Dr. Priya Sharma')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Dr. Priya Sharma')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 6: Prof. David Miller -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Robotics &amp; AI" data-name="Prof. David Miller" data-room="Room 108 - Robotics Maker Space" data-status="busy">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Prof. David Miller" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xEwU7No0vOY_VlpDVMdL2asNMcQlL3Yq_JukV0FDfPfIUX6BJ1FM3zghGONOv71hbjE1MRZsfz70MP0Pm6cbqgKbdvbt8NYLig7PMiFnAEa0vCgHxT_yNghYp7dvdCzQBvdjD2KYG0E_HiBHzEXDmfkpwVXjIc8E2OTxoCLgQc8g9NWvEb8K7A1924fsgm4HUWLlEtLjAYqAzuyb7c23ZWmugtGYgKjN9MARzkWCLb-bllvr1LG9"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Prof. David Miller</h3>
+<p class="text-xs font-medium text-slate-500">Head of Robotics • Robotics &amp; AI</p>
+</div>
+</div>
+<!-- Amber Busy Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                Busy
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 108 - Robotics Maker Space
+                </span>
+<span class="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Evaluation Session</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 14:00 - 17:00
+                </span>
+<span class="text-amber-700 font-semibold">1 Team in Room</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Senior robotic chassis stress test in progress. Do not enter without eye protection.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openQueueModal('Prof. David Miller', 1)">
+<span class="material-symbols-outlined text-[16px]">group_add</span>
+              Join Virtual Queue (#2)
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Maker Space - Ground Floor', 'Room 108', 'Prof. David Miller')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Prof. David Miller')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+<!-- Card 7: Dr. Ananya Sen -->
+<div class="faculty-card bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between" data-dept="Computer Science" data-name="Dr. Ananya Sen" data-room="Room 414 - Cloud Architecture Lab" data-status="available">
+<div class="space-y-4">
+<!-- Header -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-slate-200 bg-slate-100" data-alt="Portrait photo of Dr. Ananya Sen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4aBFX2wumqjTOqM5ITeEu4rBIAMqamLlnV0fhIz1LxBcD1VbNdBcQ4XdvhRLGebGCemRf5ihp62tfThZkJVmp3kKE2_gHnYWNPXZR6fCq6jyEVv8r0Ht9qhdOCM-gzPs-nA9NrL4OEpb8JyZnUk-rbbYXriu9iPj8KwdC5fkm84X9X0l7eMfJk8T28fZXd_WasgqeBV__o2q3SIz7jFNLno1baWiDLXdwRn9GUd38USvN86Xiqm65"/>
+<div>
+<h3 class="font-display text-base font-bold text-slate-900 leading-snug">Dr. Ananya Sen</h3>
+<p class="text-xs font-medium text-slate-500">Lecturer • Computer Science</p>
+</div>
+</div>
+<!-- Green Available Badge -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                Available
+              </span>
+</div>
+<!-- Details Block -->
+<div class="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-100">
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">meeting_room</span>
+                  Room 414 - Cloud Architecture Lab
+                </span>
+<span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Desk Presence OK</span>
+</div>
+<div class="flex items-center justify-between text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                  Today: 13:30 - 17:30
+                </span>
+<span class="text-emerald-700 font-semibold">Free Now</span>
+</div>
+</div>
+<!-- Note -->
+<p class="text-xs text-slate-600 italic">
+              “Assisting with Kubernetes cluster configurations and student Docker submissions.”
+            </p>
+</div>
+<!-- Uniform Action Buttons -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-2">
+<button class="w-full py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm flex items-center justify-center gap-1.5" onclick="openScheduleModal('Dr. Ananya Sen', 'Room 414 - Cloud Architecture Lab')">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Schedule Appointment
+            </button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openMapModal('Building B - 4th Floor', 'Room 414', 'Dr. Ananya Sen')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">map</span>
+                View Room Map
+              </button>
+<button class="py-1.5 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center justify-center gap-1" onclick="openNoticeModal('Dr. Ananya Sen')">
+<span class="material-symbols-outlined text-[15px] text-slate-400">chat</span>
+                Send Notice
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Campus Physical Sensing Telemetry: Clean White Academic Card -->
+<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+<div class="max-w-2xl space-y-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-brand-600 text-xl">sensors</span>
+<span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Campus Physical Sensing Telemetry</span>
+</div>
+<h2 class="font-display text-lg font-bold text-slate-900">How Real-time Presence Works</h2>
+<p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Faculty offices are equipped with low-power ESP32 microcontrollers paired with passive infrared (PIR) motion detectors and magnetic door reed sensors. Presence changes transmit via Supabase Realtime websockets to maintain accurate room availability across campus displays.
+          </p>
+<div class="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-600">
+<span class="inline-flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              PIR Ultrasonic Detection
+            </span>
+<span class="inline-flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-brand-600"></span>
+              Door Contact Sensors
+            </span>
+<span class="inline-flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-slate-400"></span>
+              Sub-second Socket Ping
+            </span>
+</div>
+</div>
+<!-- Clean Relay Telemetry List -->
+<div class="w-full lg:w-80 bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-2 text-xs">
+<div class="flex items-center justify-between border-b border-slate-200 pb-2">
+<span class="font-semibold text-slate-700">IoT Micro-relays</span>
+<span class="text-emerald-700 font-semibold flex items-center gap-1">
+<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              7 Nodes Online
+            </span>
+</div>
+<div class="space-y-1.5 text-slate-600">
+<div class="flex justify-between items-center">
+<span>Node-B402 (Dr. Vance)</span>
+<span class="font-medium text-emerald-700">Occupied</span>
+</div>
+<div class="flex justify-between items-center">
+<span>Node-TT310 (Prof. Rostova)</span>
+<span class="font-medium text-amber-700">Consultation</span>
+</div>
+<div class="flex justify-between items-center">
+<span>Node-HW204 (Dr. Chen)</span>
+<span class="font-medium text-emerald-700">Occupied</span>
+</div>
+<div class="flex justify-between items-center">
+<span>Node-IH512 (Dr. Jenkins)</span>
+<span class="font-medium text-slate-500">Door Locked</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive Modal 1: Clean Floor Location Map -->
+<div class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" id="map-modal">
+<div class="relative w-full max-w-xl bg-white rounded-xl border border-slate-200 shadow-xl p-5 space-y-4">
+<div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<div>
+<span class="text-xs font-semibold text-brand-600 uppercase tracking-wider" id="modal-map-building">Building B - 4th Floor</span>
+<h3 class="font-display text-base font-bold text-slate-900" id="modal-map-title">Office Location Map</h3>
+</div>
+<button class="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" onclick="closeMapModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="relative w-full h-64 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+<div class="w-full h-full bg-cover bg-center" data-location="Campus Faculty Building" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC9G_e7aP9amS6UggJEbOc6oRf3MDFZxdhEYNm-0Mg_UTHumqgn5rwWudhS7wswdm1leuzWbIdJ20hSKN5iFsSjz-BNHUWqrIW2K2nN_bHumsHKf900wvHrjU9JwHEaB6O-_5keMLKFUxbAIAp3uxdNgcW43FzWOycbO8nxfF1uE9Zb2KjfBImxGrEMq6z3SByYelTrSvxOCxDm4kFQ2ldAfyfOvKdAOTJyX7TYk9FRPGw-dZnjIzEu')"></div>
+<div class="absolute bottom-2 left-2 right-2 flex items-center justify-between p-2.5 rounded-lg bg-white/95 backdrop-blur border border-slate-200 text-xs shadow-sm">
+<div class="flex items-center gap-1.5 font-medium text-slate-800">
+<span class="material-symbols-outlined text-brand-600 text-[18px]">location_on</span>
+<span id="modal-map-room">Room 402</span>
+</div>
+<span class="text-slate-500 font-medium">Take Elevator B to 4th Floor</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-1">
+<button class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition" onclick="closeMapModal()">
+          Close
+        </button>
+<button class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm" onclick="alert('Floor route downloaded.')">
+          Download PDF Guide
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 2: Virtual Queue Enrollment -->
+<div class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" id="queue-modal">
+<div class="relative w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-xl p-5 space-y-4">
+<div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<div>
+<span class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Virtual Walk-In Queue</span>
+<h3 class="font-display text-base font-bold text-slate-900" id="queue-faculty-name">Prof. Elena Rostova</h3>
+</div>
+<button class="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" onclick="closeQueueModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-3.5 rounded-lg bg-amber-50/60 border border-amber-200 flex items-center justify-between text-xs">
+<div>
+<span class="text-slate-500 block">Assigned Queue Spot</span>
+<span class="text-base font-bold text-amber-800" id="queue-slot-text">Position #3</span>
+</div>
+<div class="text-right">
+<span class="text-slate-500 block">Estimated Wait</span>
+<span class="text-base font-bold text-slate-900">~15 mins</span>
+</div>
+</div>
+<div class="space-y-1.5 text-xs">
+<label class="font-medium text-slate-700" for="queue-topic-input">Consultation Reason / Question</label>
+<input class="w-full border border-slate-200 text-slate-900 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 text-xs" id="queue-topic-input" placeholder="e.g. Deep Learning Project milestone review" type="text"/>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition" onclick="closeQueueModal()">
+          Cancel
+        </button>
+<button class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition shadow-sm" onclick="confirmQueueJoin()">
+          Confirm Position
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 3: Notice Modal -->
+<div class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" id="notice-modal">
+<div class="relative w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-xl p-5 space-y-4">
+<div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<div>
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Leave Lecturer Message</span>
+<h3 class="font-display text-base font-bold text-slate-900" id="notice-faculty-name">Dr. Alan Vance</h3>
+</div>
+<button class="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" onclick="closeNoticeModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="text-xs text-slate-600">
+        This message transmits directly to the professor's office terminal and notification center.
+      </p>
+<div class="space-y-1.5 text-xs">
+<label class="font-medium text-slate-700" for="notice-message-input">Message</label>
+<textarea class="w-full border border-slate-200 text-slate-900 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 text-xs resize-none" id="notice-message-input" placeholder="Hello Professor, I have dropped off my assignment folder outside room 402." rows="3"></textarea>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition" onclick="closeNoticeModal()">
+          Cancel
+        </button>
+<button class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm" onclick="sendNoticeAction()">
+          Send Notice
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 4: Appointment Scheduling -->
+<div class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" id="schedule-modal">
+<div class="relative w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-xl p-5 space-y-4">
+<div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<div>
+<span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Book Office Hours Slot</span>
+<h3 class="font-display text-base font-bold text-slate-900" id="schedule-faculty-name">Dr. Alan Vance</h3>
+</div>
+<button class="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" onclick="closeScheduleModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="space-y-2 text-xs">
+<span class="font-medium text-slate-700 block">Select Available Window</span>
+<div class="grid grid-cols-3 gap-2">
+<button class="py-2 px-2 rounded-md border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition text-center">
+            14:15 - 14:30
+          </button>
+<button class="py-2 px-2 rounded-md bg-brand-50 border border-brand-300 text-brand-700 text-xs font-semibold transition text-center">
+            14:30 - 14:45
+          </button>
+<button class="py-2 px-2 rounded-md border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50 transition text-center">
+            15:00 - 15:15
+          </button>
+</div>
+</div>
+<div class="space-y-1.5 text-xs">
+<label class="font-medium text-slate-700" for="schedule-notes-input">Consultation Topic</label>
+<input class="w-full border border-slate-200 text-slate-900 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600 text-xs" id="schedule-notes-input" placeholder="e.g. Capstone milestone 2 design feedback" type="text"/>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition" onclick="closeScheduleModal()">
+          Cancel
+        </button>
+<button class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition shadow-sm" onclick="confirmScheduleAppointment()">
+          Confirm Booking
+        </button>
+</div>
+</div>
+</div>
+<!-- Real-Time Floating Notification Toast -->
+<div class="fixed bottom-6 right-6 z-50 hidden bg-white border border-slate-200 text-slate-800 p-4 rounded-xl shadow-lg flex items-center gap-3 max-w-sm transition-all" id="live-toast">
+<div class="h-8 w-8 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="flex-1">
+<span class="text-xs font-bold text-slate-900 block" id="toast-title">Notification</span>
+<span class="text-xs text-slate-600" id="toast-message">Action processed.</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600" onclick="hideToast()">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- University Portal Footer -->
+<footer class="w-full bg-white border-t border-slate-200 py-6 mt-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+<div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+<span class="font-semibold text-slate-700">University Faculty Availability Directory</span>
+<span class="hidden sm:inline text-slate-300">•</span>
+<span>ESP32 Microcontroller Mesh + Supabase Realtime</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+<span>Campus Node Latency: 24ms</span>
+</div>
+</div>
+</footer>
+<!-- Search, Filter & Modal Scripts -->
+<script>
+    let activeDept = 'all';
+    let activeStatus = 'all';
+
+    const searchInput = document.getElementById('faculty-search-input');
+    const facultyCards = document.querySelectorAll('.faculty-card');
+    const deptChips = document.querySelectorAll('.dept-chip');
+    const statusBtns = document.querySelectorAll('.status-btn');
+
+    function applyFilters() {
+      const query = (searchInput.value || '').toLowerCase().trim();
+
+      facultyCards.forEach(card => {
+        const name = (card.dataset.name || '').toLowerCase();
+        const dept = (card.dataset.dept || '');
+        const status = (card.dataset.status || '');
+        const room = (card.dataset.room || '').toLowerCase();
+
+        const matchesQuery = !query || name.includes(query) || room.includes(query) || dept.toLowerCase().includes(query);
+        const matchesDept = (activeDept === 'all') || (dept === activeDept);
+        const matchesStatus = (activeStatus === 'all') || (status === activeStatus);
+
+        if (matchesQuery && matchesDept && matchesStatus) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      } else if (e.key === 'Escape') {
+        closeMapModal();
+        closeQueueModal();
+        closeNoticeModal();
+        closeScheduleModal();
+      }
+    });
+
+    deptChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        deptChips.forEach(c => {
+          c.classList.remove('bg-slate-900', 'text-white');
+          c.classList.add('bg-slate-100', 'text-slate-600');
+        });
+        chip.classList.add('bg-slate-900', 'text-white');
+        chip.classList.remove('bg-slate-100', 'text-slate-600');
+
+        activeDept = chip.dataset.dept;
+        applyFilters();
+      });
+    });
+
+    statusBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        statusBtns.forEach(b => {
+          b.classList.remove('bg-brand-600', 'text-white');
+          b.classList.add('bg-slate-100', 'text-slate-600');
+        });
+        btn.classList.add('bg-brand-600', 'text-white');
+        btn.classList.remove('bg-slate-100', 'text-slate-600');
+
+        activeStatus = btn.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    function openMapModal(building, room, name) {
+      document.getElementById('modal-map-building').innerText = building;
+      document.getElementById('modal-map-room').innerText = room + ' • ' + name;
+      document.getElementById('map-modal').classList.remove('hidden');
+    }
+    function closeMapModal() {
+      document.getElementById('map-modal').classList.add('hidden');
+    }
+
+    function openQueueModal(facultyName, currentQueueSize) {
+      document.getElementById('queue-faculty-name').innerText = facultyName;
+      document.getElementById('queue-slot-text').innerText = 'Position #' + (currentQueueSize + 1);
+      document.getElementById('queue-modal').classList.remove('hidden');
+    }
+    function closeQueueModal() {
+      document.getElementById('queue-modal').classList.add('hidden');
+    }
+    function confirmQueueJoin() {
+      closeQueueModal();
+      showToast('Queue Registered', 'Your queue spot has been reserved. You will receive an SMS reminder.');
+    }
+
+    function openNoticeModal(facultyName) {
+      document.getElementById('notice-faculty-name').innerText = facultyName;
+      document.getElementById('notice-modal').classList.remove('hidden');
+    }
+    function closeNoticeModal() {
+      document.getElementById('notice-modal').classList.add('hidden');
+    }
+    function sendNoticeAction() {
+      closeNoticeModal();
+      showToast('Notice Delivered', 'Your message has been routed to the office desk display.');
+    }
+
+    function openScheduleModal(facultyName, room) {
+      document.getElementById('schedule-faculty-name').innerText = facultyName + ' (' + room + ')';
+      document.getElementById('schedule-modal').classList.remove('hidden');
+    }
+    function closeScheduleModal() {
+      document.getElementById('schedule-modal').classList.add('hidden');
+    }
+    function confirmScheduleAppointment() {
+      closeScheduleModal();
+      showToast('Appointment Confirmed', 'Office visit added to your university calendar.');
+    }
+
+    let toastTimeout;
+    function showToast(title, msg) {
+      const toast = document.getElementById('live-toast');
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+    function hideToast() {
+      document.getElementById('live-toast').classList.add('hidden');
+    }
+  </script>
+</body></html>
+
+<!-- SmartFaculty - Live Availability Portal (University Edition) -->
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<title>SmartFaculty IoT - Academic Availability System</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        font-family: 'Inter', sans-serif;
+      }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              900: '#1E3A8A'
+            },
+            status: {
+              available: '#16A34A',
+              'available-bg': '#DCFCE7',
+              busy: '#D97706',
+              'busy-bg': '#FEF3C7',
+              unavailable: '#DC2626',
+              'unavailable-bg': '#FEE2E2'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+<!-- Navigation Header -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-slate-200">
+<div class="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+<!-- Brand & Subtitle -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-[22px]">domain</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-display font-bold text-base tracking-tight text-slate-900 leading-tight">SmartFaculty IoT</span>
+<span class="hidden sm:inline-block px-1.5 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Campus Live</span>
+</div>
+<span class="text-xs text-slate-500 font-medium leading-none">Campus Availability System</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-3 py-1.5 rounded-md text-sm font-semibold bg-blue-50 text-blue-700 transition-colors" data-path="overview-role-select" href="#">Overview</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-path="lecturer-control" href="#">Lecturer Control</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-path="student-directory" href="#">Student Directory</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-path="iot-esp32-terminal" href="#">IoT Terminal</a>
+<a class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" data-path="admin-registry" href="#">Admin Registry</a>
+</nav>
+<!-- Right System Telemetry & Status Badges -->
+<div class="flex items-center gap-3 shrink-0">
+<div class="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700">
+<span class="flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span> 4 Available
+          </span>
+<span class="text-slate-300">|</span>
+<span class="flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-amber-500"></span> 2 Busy
+          </span>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span>
+<span class="hidden sm:inline">Realtime Connected</span>
+<span class="sm:hidden">Live</span>
+</div>
+<button aria-label="Faculty Profile" class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Wrapper -->
+<main class="w-full pt-16 min-h-[calc(100vh-4rem)]">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+<!-- Academic Hero Section -->
+<section class="flex flex-col gap-6 pt-2">
+<div class="flex flex-col gap-2 max-w-3xl">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Department of Computer Science &amp; Engineering</span>
+<span class="text-xs text-slate-500 font-mono">Node: ESP32-CORR-04B</span>
+</div>
+<h1 class="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-slate-900 tracking-tight">
+            Smart Multi-Lecturer Availability Display
+          </h1>
+<p class="text-base text-slate-600 font-normal leading-relaxed">
+            Check faculty availability across departments and corridor terminals in real time. Faculty updates sync instantly with corridor hardware displays.
+          </p>
+</div>
+<!-- Uniform Clean Academic Statistics Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Total Faculty -->
+<div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Faculty</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-2xl sm:text-3xl text-slate-900">7</span>
+<span class="text-xs font-medium text-slate-500">Registered</span>
+</div>
+<span class="text-xs text-slate-500 flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[15px] text-blue-600">domain</span> Computer Science Wing
+            </span>
+</div>
+<!-- Available Now -->
+<div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Available Now</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-2xl sm:text-3xl text-emerald-700">4</span>
+<span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">Walk-in</span>
+</div>
+<span class="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span> In Office
+            </span>
+</div>
+<!-- Busy / Advising -->
+<div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Busy / Advising</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-2xl sm:text-3xl text-amber-700">2</span>
+<span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">Consultation</span>
+</div>
+<span class="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+<span class="h-2 w-2 rounded-full bg-amber-500"></span> Session in progress
+            </span>
+</div>
+<!-- Not Available / Out -->
+<div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Not Available / Out</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display font-bold text-2xl sm:text-3xl text-red-700">1</span>
+<span class="text-xs font-semibold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-100">Off Campus</span>
+</div>
+<span class="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+<span class="h-2 w-2 rounded-full bg-red-600"></span> In Lecture Hall A
+            </span>
+</div>
+</div>
+</section>
+<!-- Role Selection Gateway Section -->
+<section class="flex flex-col gap-4" id="role-gateways">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+<div>
+<h2 class="font-display font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Select Your Role Gateway</h2>
+<p class="text-sm text-slate-600">Access role-specific workflows for faculty, students, or system administrators.</p>
+</div>
+<span class="self-start sm:self-auto px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-slate-500">badge</span>
+            University System Auth
+          </span>
+</div>
+<!-- 4 Uniform Clean White Gateway Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- Card 1: Lecturer Dashboard -->
+<div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-400 transition-colors group">
+<div class="flex flex-col gap-4">
+<div class="w-10 h-10 rounded-md bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">co_present</span>
+</div>
+<div>
+<h3 class="font-display font-semibold text-base text-slate-900 group-hover:text-blue-600 transition-colors">Lecturer Dashboard</h3>
+<p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                  Update your office presence and broadcast messages to corridor hardware.
+                </p>
+</div>
+</div>
+<div class="pt-6 mt-2 border-t border-slate-100">
+<a class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors" data-path="lecturer-control" href="#">
+                Enter Dashboard <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 2: Student View -->
+<div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-400 transition-colors group">
+<div class="flex flex-col gap-4">
+<div class="w-10 h-10 rounded-md bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</div>
+<div>
+<h3 class="font-display font-semibold text-base text-slate-900 group-hover:text-blue-600 transition-colors">Student View</h3>
+<p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                  Search faculty members, view live consultation hours and room locations.
+                </p>
+</div>
+</div>
+<div class="pt-6 mt-2 border-t border-slate-100">
+<a class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors" data-path="student-directory" href="#">
+                Search Directory <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 3: IoT ESP32 Display -->
+<div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-400 transition-colors group">
+<div class="flex flex-col gap-4">
+<div class="w-10 h-10 rounded-md bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">developer_board</span>
+</div>
+<div>
+<h3 class="font-display font-semibold text-base text-slate-900 group-hover:text-blue-600 transition-colors">IoT ESP32 Display</h3>
+<p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                  Full-screen hardware terminal display preview for physical door screens.
+                </p>
+</div>
+</div>
+<div class="pt-6 mt-2 border-t border-slate-100">
+<a class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors" data-path="iot-esp32-terminal" href="#">
+                Launch Terminal <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 4: Admin Panel -->
+<div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-400 transition-colors group">
+<div class="flex flex-col gap-4">
+<div class="w-10 h-10 rounded-md bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+</div>
+<div>
+<h3 class="font-display font-semibold text-base text-slate-900 group-hover:text-blue-600 transition-colors">Admin Panel</h3>
+<p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                  Manage faculty directory roster, room allocations, and hardware pairings.
+                </p>
+</div>
+</div>
+<div class="pt-6 mt-2 border-t border-slate-100">
+<a class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors" data-path="admin-registry" href="#">
+                Manage Roster <span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Faculty Directory Snapshot & Live Telemetry -->
+<section class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+<div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h3 class="font-display font-bold text-base sm:text-lg text-slate-900">Faculty Presence Roster</h3>
+<p class="text-xs sm:text-sm text-slate-500">Live corridor presence broadcast status for Engineering Wing Level 4.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 font-medium">Filter:</span>
+<button class="px-2.5 py-1 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200" type="button">All (7)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-100 border border-transparent" type="button">Available (4)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-100 border border-transparent" type="button">Busy (2)</button>
+</div>
+</div>
+<!-- Academic Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse text-sm">
+<thead>
+<tr class="bg-slate-50/75 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+<th class="py-3 px-5">Faculty Member</th>
+<th class="py-3 px-4">Department / Specialization</th>
+<th class="py-3 px-4">Office Room</th>
+<th class="py-3 px-4">Live Status</th>
+<th class="py-3 px-4">Corridor Node</th>
+<th class="py-3 px-5 text-right">Quick Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1: Dr. Alan Vance -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-3.5 px-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs flex items-center justify-center shrink-0">
+                      AV
+                    </div>
+<div>
+<span class="font-semibold text-slate-900 block leading-tight">Dr. Alan Vance</span>
+<span class="text-xs text-slate-500">alan.vance@faculty.edu</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-slate-600">Distributed Systems</td>
+<td class="py-3.5 px-4 font-mono font-medium text-slate-800">Room 402</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                    Available
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-xs font-mono text-slate-500">Node #04B</td>
+<td class="py-3.5 px-5 text-right">
+<button class="px-2.5 py-1 rounded text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-colors" onclick="updateHardwareSimulator('Dr. Alan Vance', '402', 'AVAILABLE', 'status-available', 'Broadcasted from Portal'); showNotification('Broadcast sent for Dr. Alan Vance');" type="button">
+                    Simulate Sync
+                  </button>
+</td>
+</tr>
+<!-- Row 2: Prof. Elena Rostova -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-3.5 px-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center shrink-0">
+                      ER
+                    </div>
+<div>
+<span class="font-semibold text-slate-900 block leading-tight">Prof. Elena Rostova</span>
+<span class="text-xs text-slate-500">elena.rostova@faculty.edu</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-slate-600">AI &amp; Robotics Lab</td>
+<td class="py-3.5 px-4 font-mono font-medium text-slate-800">Room 310</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+<span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                    Busy (Consulting)
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-xs font-mono text-slate-500">Node #02A</td>
+<td class="py-3.5 px-5 text-right">
+<button class="px-2.5 py-1 rounded text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-colors" onclick="updateHardwareSimulator('Prof. Elena Rostova', '310', 'BUSY / ADVISING', 'status-busy', 'Office Consultation'); showNotification('Broadcast sent for Prof. Elena Rostova');" type="button">
+                    Simulate Sync
+                  </button>
+</td>
+</tr>
+<!-- Row 3: Dr. Marcus Kane -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="py-3.5 px-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center shrink-0">
+                      MK
+                    </div>
+<div>
+<span class="font-semibold text-slate-900 block leading-tight">Dr. Marcus Kane</span>
+<span class="text-xs text-slate-500">m.kane@faculty.edu</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4 text-slate-600">Computer Architecture</td>
+<td class="py-3.5 px-4 font-mono font-medium text-slate-800">Room 215</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-800 border border-red-200">
+<span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>
+                    Not Available (Lecture Hall A)
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-xs font-mono text-slate-500">Node #07F</td>
+<td class="py-3.5 px-5 text-right">
+<button class="px-2.5 py-1 rounded text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-colors" onclick="updateHardwareSimulator('Dr. Marcus Kane', '215', 'IN LECTURE HALL', 'status-unavailable', 'Hall A - Returns 15:00'); showNotification('Broadcast sent for Dr. Marcus Kane');" type="button">
+                    Simulate Sync
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Telemetry Activity Bar at bottom of table -->
+<div class="bg-slate-50 p-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 font-mono">
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span>
+<span class="font-semibold text-slate-800">Active Realtime Channel:</span>
+<span class="text-slate-500 truncate" id="ticker-feed">presence_faculty_live • Ping 24ms • Supabase WS</span>
+</div>
+<div class="flex items-center gap-3">
+<span>Last sync: Just now</span>
+<span class="text-slate-300">|</span>
+<span class="text-emerald-700 font-semibold" id="live-sync-indicator">Synchronized</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Professional Academic Footer -->
+<footer class="w-full bg-white border-t border-slate-200 py-6 mt-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex flex-col gap-1 text-center md:text-left">
+<span class="text-xs font-semibold text-slate-900 uppercase tracking-wider">Smart Multi-Lecturer Availability Display System</span>
+<span class="text-xs text-slate-500">Faculty of Computer Science &amp; Engineering • Academic Term 2024-2025</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<span class="flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-emerald-600"></span> Hardware Terminals Active
+        </span>
+<span class="text-slate-300">|</span>
+<span>Version 2.4.1 (Stable)</span>
+</div>
+</div>
+</footer>
+<!-- Notification Toast -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="toast-notification">
+<div class="px-4 py-3 rounded-lg bg-white border border-slate-200 shadow-md text-slate-900 flex items-center gap-3">
+<div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-900" id="toast-title">Broadcast Synchronized</span>
+<span class="text-xs text-slate-600" id="toast-message">Corridor door screen updated successfully.</span>
+</div>
+<button class="ml-2 text-slate-400 hover:text-slate-600" onclick="hideNotification()" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- Interactive Client-side Script -->
+<script>
+    function updateHardwareSimulator(name, room, status, statusColorClass, detail) {
+      const syncInd = document.getElementById('live-sync-indicator');
+      const tickerFeed = document.getElementById('ticker-feed');
+
+      if (syncInd) {
+        syncInd.innerText = 'Transmitting Payload...';
+        syncInd.className = 'text-blue-600 font-semibold';
+        setTimeout(() => {
+          syncInd.innerText = 'Synchronized';
+          syncInd.className = 'text-emerald-700 font-semibold';
+        }, 1500);
+      }
+
+      if (tickerFeed) {
+        tickerFeed.innerText = name + ' (' + room + ') -> ' + status + ' • Just now';
+      }
+    }
+
+    let toastTimer;
+    function showNotification(msg) {
+      const toast = document.getElementById('toast-notification');
+      const msgEl = document.getElementById('toast-message');
+      if (!toast || !msgEl) return;
+
+      msgEl.innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideNotification, 3000);
+    }
+
+    function hideNotification() {
+      const toast = document.getElementById('toast-notification');
+      if (!toast) return;
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+    }
+  </script>
+</body></html>
